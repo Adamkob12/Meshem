@@ -1,7 +1,5 @@
-//! Function that uses an optimized meshing algorithm to generate a mesh given
-//! a grid of formatted blocks (voxels, cubes etc.). The mesh will include the minimal
-//! amount of vertices, and will be computed efficiently.
-use crate::prelude::{Dimensions, Neighbors, VoxelRegistry};
+//! This file contains the function itself, and some added utilities and defs.
+use super::{Dimensions, Neighbors, VoxelRegistry};
 use crate::util::vav::*;
 use bevy::prelude::*;
 use bevy::render::mesh::{
@@ -9,6 +7,12 @@ use bevy::render::mesh::{
 };
 use bevy::render::render_resource::PrimitiveTopology;
 use bevy::utils::hashbrown::HashMap;
+
+#[derive(Debug, Clone)]
+pub enum MeshingAlgorithm {
+    Stupid,
+    Culling,
+}
 
 /// Arguments:
 /// - [`dims`](Dimensions): the dimensions of the grid, (width, len, height). (eg: (16, 16, 256))
@@ -19,16 +23,11 @@ use bevy::utils::hashbrown::HashMap;
 ///     we need, but(!) the size of each of the voxels MUST be the same across the entire grid.
 ///     if this condition is not met, the grid will not be properly meshified.
 ///     An example to create a [`VoxelRegistry`] is in the examples folder.
+/// - ['ma'](MeshingAlgorithm): The meshing algorithm to use - currently supports Culling and
+///     Stupid. (Culling is always better than Stupid)
 /// Return:
 /// - [`Some(mesh)`](Mesh): the mesh
 /// - [`None`]: couldn't create mesh
-
-#[derive(Debug, Clone)]
-pub enum MeshingAlgorithm {
-    Stupid,
-    Culling,
-}
-
 pub fn meshem<T>(
     dims: Dimensions,
     grid: Vec<T>,
@@ -132,6 +131,10 @@ pub fn meshem<T>(
     Some(mesh)
 }
 
+/// Important helper function to add the vertices and indices of each voxel into the running count of vertices
+/// and indices, preserving their attributes, and (important!) assigning a custom offset to the
+/// position attributes, we are assuming this is only needed for the position attributes (because
+/// it usually is).
 fn add_vertices(
     neig: Neighbors,
     indices_main: &mut Vec<u32>,

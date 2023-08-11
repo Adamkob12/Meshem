@@ -1,5 +1,5 @@
 [package]
-name = "meshem"
+name = "bevy_meshem"
 version = "0.1.0"
 edition = "2021"
 

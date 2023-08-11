@@ -1,8 +1,12 @@
+//! An example that showcases how to use the meshem function.
 #[allow(unused_imports)]
 use bevy::pbr::wireframe::{Wireframe, WireframeConfig, WireframePlugin};
 use bevy::prelude::*;
-use meshem::prelude::*;
+use bevy_meshem::default_block::*;
+use bevy_meshem::meshem::*;
+use bevy_meshem::*;
 
+/// Constants for us to use.
 const FACTOR: usize = 15;
 const SPEED: f32 = FACTOR as f32 * 2.0;
 const MESHING_ALGORITHM: MeshingAlgorithm = MeshingAlgorithm::Culling;
@@ -49,6 +53,7 @@ struct ToggleWireframe;
 #[derive(Event, Default)]
 struct RegenerateMesh;
 
+/// Setting up everything to showcase the mesh.
 fn setup(
     breg: Res<BlockRegistry>,
     mut commands: Commands,
@@ -153,20 +158,32 @@ struct BlockRegistry {
     block: Mesh,
 }
 
+/// The important part! Without implementing a [`VoxelRegistry`], you can't use the function.
 impl VoxelRegistry for BlockRegistry {
+    /// The type of our Voxel, the example uses u16 for Simplicity but you may have a struct
+    /// Block { Name: ..., etc ...}, and you'll define that as the type, but encoding the block
+    /// data onto simple type like u16 or u64 is probably prefferable.
     type Voxel = u16;
+    /// The get_mesh function, probably the most important function in the
+    /// [`VoxelRegistry`], it is what allows us to  quickly access the Mesh of each Voxel.
     fn get_mesh(&self, voxel: &Self::Voxel) -> Option<&Mesh> {
         if *voxel == 0 {
             return None;
         }
         Some(&self.block)
     }
+    /// Important function that tells our Algorithm if the Voxel is "full", for example, the Air
+    /// in minecraft is not "full", but it is still on the chunk data, to singal there is nothing.
     fn is_voxel(&self, voxel: &u16) -> bool {
         return *voxel != 0;
     }
+    /// The center of the Mesh, out mesh is defined in src/default_block.rs, just a constant.
     fn get_center(&self) -> [f32; 3] {
         return [0.0, 0.0, 0.0];
     }
+    /// The attributes we want to take from out voxels, note that using a lot of different
+    /// attributes will likely lead to performance problems and unpredictible behaviour.
+    /// We chose these 3 because they are very common, the algorithm does preserve UV data.
     fn all_attributes(&self) -> Vec<bevy::render::mesh::MeshVertexAttribute> {
         return vec![
             Mesh::ATTRIBUTE_POSITION,
@@ -176,6 +193,7 @@ impl VoxelRegistry for BlockRegistry {
     }
 }
 
+/// Simple system to handle inputs for the showcase.
 fn input_handler(
     keyboard_input: Res<Input<KeyCode>>,
     mut query: Query<&mut Transform, With<Meshy>>,
@@ -211,6 +229,7 @@ fn input_handler(
     }
 }
 
+/// Function to toggle wireframe (seeing the vertices and indices of the mesh).
 fn toggle_wireframe(
     mut commands: Commands,
     mut materials: ResMut<Assets<StandardMaterial>>,
@@ -270,6 +289,7 @@ fn input_handler_rotation(
     // }
 }
 
+/// System to regenerate the mesh, but using a different algorithm.
 fn regenerate_mesh(
     mut meshy: Query<&mut Meshy>,
     breg: Res<BlockRegistry>,

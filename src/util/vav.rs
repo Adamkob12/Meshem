@@ -1,3 +1,6 @@
+//! Pretty hefty module, it defines a lot of needed methods on the VertexAttributeValues,
+//! that makes working with them more comfortable. It is very spaghetti but it helps with the
+//! readabillity of main API.
 use bevy::render::{
     mesh::{Indices, MeshVertexAttribute, MeshVertexAttributeId, VertexAttributeValues},
     render_resource::VertexFormat,
@@ -30,7 +33,7 @@ impl VAVutils for VertexAttributeValues {
                         .collect(),
                 );
             }
-            _ => panic!("Method offset_all only works for Float32x3"),
+            _ => panic!("Method offset_all only works for Float32x3 (the standard for position)"),
         }
     }
     fn extend(&mut self, t: &VertexAttributeValues) {
