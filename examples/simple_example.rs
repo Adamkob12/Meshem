@@ -3,8 +3,8 @@ use bevy::pbr::wireframe::{Wireframe, WireframeConfig, WireframePlugin};
 use bevy::prelude::*;
 use meshem::prelude::*;
 
-const SPEED: f32 = 65.0;
-const FACTOR: usize = 70;
+const FACTOR: usize = 15;
+const SPEED: f32 = FACTOR as f32 * 2.0;
 const MESHING_ALGORITHM: MeshingAlgorithm = MeshingAlgorithm::Culling;
 
 fn main() {

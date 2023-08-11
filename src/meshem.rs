@@ -105,6 +105,9 @@ pub fn meshem<T>(
                     MeshingAlgorithm::Culling => {}
                 }
 
+                if neig == [false, false, false, false, false, false] {
+                    continue;
+                }
                 if in_range(cord, 0, t) {
                     if let Some(v_mesh) = reg.get_mesh(&grid[cord]) {
                         add_vertices(
