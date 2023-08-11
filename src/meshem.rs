@@ -2,7 +2,7 @@
 //! a grid of formatted blocks (voxels, cubes etc.). The mesh will include the minimal
 //! amount of vertices, and will be computed efficiently.
 use crate::prelude::{Dimensions, Neighbors, VoxelRegistry};
-use crate::utils::*;
+use crate::util::vav::*;
 use bevy::prelude::*;
 use bevy::render::mesh::{
     Indices, MeshVertexAttribute, MeshVertexAttributeId, VertexAttributeValues,
@@ -23,6 +23,7 @@ use bevy::utils::hashbrown::HashMap;
 /// - [`Some(mesh)`](Mesh): the mesh
 /// - [`None`]: couldn't create mesh
 
+#[derive(Debug, Clone)]
 pub enum MeshingAlgorithm {
     Stupid,
     Culling,

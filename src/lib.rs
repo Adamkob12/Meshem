@@ -1,12 +1,11 @@
 #![allow(dead_code, unused_imports, unused_variables)]
 mod default_block;
 mod meshem;
-mod utils;
+mod util;
 
 pub mod prelude {
     pub use crate::default_block::*;
     pub use crate::meshem::*;
-
     use bevy::render::mesh::{
         Indices, Mesh, MeshVertexAttribute, MeshVertexAttributeId, VertexAttributeValues,
     };

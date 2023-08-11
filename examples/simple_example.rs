@@ -1,63 +1,95 @@
+#[allow(unused_imports)]
+use bevy::pbr::wireframe::{Wireframe, WireframeConfig, WireframePlugin};
 use bevy::prelude::*;
 use meshem::prelude::*;
 
-const FACTOR: usize = 12;
+const SPEED: f32 = 65.0;
+const FACTOR: usize = 70;
 const MESHING_ALGORITHM: MeshingAlgorithm = MeshingAlgorithm::Culling;
 
 fn main() {
     let mut app = App::new();
-    app.add_plugins(DefaultPlugins);
+    app.add_plugins(DefaultPlugins).add_plugins(WireframePlugin);
 
     app.insert_resource(BlockRegistry {
         block: default_block(),
+    })
+    .insert_resource(AmbientLight {
+        brightness: 1.5,
+        color: Color::WHITE,
     });
 
-    app.add_systems(Startup, setup)
-        .add_systems(Update, input_handler);
+    app.add_systems(Startup, setup).add_systems(
+        Update,
+        (
+            input_handler,
+            toggle_wireframe,
+            input_handler_rotation,
+            regenerate_mesh,
+        ),
+    );
+
+    app.add_event::<ToggleWireframe>()
+        .add_event::<RegenerateMesh>();
+
     app.run();
 }
 
 #[derive(Component)]
-struct Meshy;
+struct Meshy {
+    ma: MeshingAlgorithm,
+}
+
+#[derive(Component)]
+struct MeshInfo;
+
+#[derive(Event, Default)]
+struct ToggleWireframe;
+
+#[derive(Event, Default)]
+struct RegenerateMesh;
 
 fn setup(
     breg: Res<BlockRegistry>,
     mut commands: Commands,
-    asset_server: ResMut<AssetServer>,
     mut materials: ResMut<Assets<StandardMaterial>>,
+    // wireframe_config: ResMut<WireframeConfig>,
     mut meshes: ResMut<Assets<Mesh>>,
 ) {
-    // let grid: Vec<u16> = vec![1; 27];
-    // let dims: Dimensions = (3, 3, 3);
-
     let grid: Vec<u16> = vec![1; FACTOR * FACTOR * FACTOR];
     let dims: Dimensions = (FACTOR, FACTOR, FACTOR);
 
-    // let grid: Vec<u16> = vec![1; 8];
-    // let dims: Dimensions = (2, 2, 2);
-
     let culled_mesh = meshem(dims, grid, breg.into_inner(), MESHING_ALGORITHM).unwrap();
     let culled_mesh_handle: Handle<Mesh> = meshes.add(culled_mesh.clone());
-    let custom_texture_handle: Handle<Image> = asset_server.load("array_texture.png");
     commands.spawn((
         PbrBundle {
             mesh: culled_mesh_handle,
             material: materials.add(StandardMaterial {
-                base_color_texture: Some(custom_texture_handle),
+                base_color: Color::SALMON,
+                alpha_mode: AlphaMode::Mask(0.5),
                 ..default()
             }),
             ..default()
         },
-        Meshy,
+        Meshy {
+            ma: MESHING_ALGORITHM,
+        },
     ));
 
     // Transform for the camera and lighting, looking at (0,0,0) (the position of the mesh).
     let camera_and_light_transform = Transform::from_xyz(
-        FACTOR as f32 * 2.0,
-        FACTOR as f32 * 2.0,
-        FACTOR as f32 * 2.0,
+        FACTOR as f32 * 1.7,
+        FACTOR as f32 * 1.7,
+        FACTOR as f32 * 1.7,
     )
-    .looking_at(Vec3::ZERO, Vec3::Y);
+    .looking_at(
+        Vec3::new(
+            FACTOR as f32 * 0.5,
+            FACTOR as f32 * 0.5,
+            FACTOR as f32 * 0.5,
+        ),
+        Vec3::Y,
+    );
 
     // Camera in 3D space.
     commands.spawn(Camera3dBundle {
@@ -68,7 +100,7 @@ fn setup(
     // Light up the scene.
     commands.spawn(PointLightBundle {
         point_light: PointLight {
-            intensity: 9000.0,
+            intensity: 5000.0,
             range: 500.0,
             ..default()
         },
@@ -79,14 +111,13 @@ fn setup(
     //     // dbg!(att);
     //     if att == Mesh::ATTRIBUTE_POSITION.id {}
     // }
-    println!("~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
-    dbg!(culled_mesh.count_vertices());
-    println!("\n~~~~~~~~~~~~~~~~~~~~~~~~~~");
     commands.spawn(
         TextBundle::from_section(
-            "X/Y/Z: Rotate\nR: Reset orientation",
+            format!(
+                "X/Y/Z: Rotate\nR: Reset orientation\nMove Camera: W/A/S/D/Left-Shift/Space\nToggle Wireframe: T\n"),
             TextStyle {
-                font_size: 20.0,
+                font_size: 26.0,
+                color: Color::LIME_GREEN,
                 ..default()
             },
         )
@@ -97,6 +128,24 @@ fn setup(
             ..default()
         }),
     );
+    commands.spawn((
+        MeshInfo,
+        TextBundle::from_section(
+            format!("Press -C- To regenerate the mesh with a different Algorithm\nVertices Count: {}\nMeshing Algorithm: {:?}",culled_mesh.count_vertices(),
+                MESHING_ALGORITHM,),
+            TextStyle {
+                font_size: 26.0,
+                color: Color::LIME_GREEN,
+                ..default()
+            },
+        )
+        .with_style(Style {
+            position_type: PositionType::Absolute,
+            bottom: Val::Px(12.0),
+            left: Val::Px(12.0),
+            ..default()
+        }),
+    ));
 }
 
 #[derive(Resource)]
@@ -126,12 +175,14 @@ impl VoxelRegistry for BlockRegistry {
         ];
     }
 }
+
 fn input_handler(
     keyboard_input: Res<Input<KeyCode>>,
     mut query: Query<&mut Transform, With<Meshy>>,
     time: Res<Time>,
+    mut event_writer: EventWriter<ToggleWireframe>,
+    mut e: EventWriter<RegenerateMesh>,
 ) {
-    if keyboard_input.just_pressed(KeyCode::Space) {}
     if keyboard_input.pressed(KeyCode::X) {
         for mut transform in &mut query {
             transform.rotate_x(time.delta_seconds() / 1.2);
@@ -151,5 +202,99 @@ fn input_handler(
         for mut transform in &mut query {
             transform.look_to(Vec3::NEG_Z, Vec3::Y);
         }
+    }
+    if keyboard_input.just_pressed(KeyCode::T) {
+        event_writer.send_default();
+    }
+    if keyboard_input.just_pressed(KeyCode::C) {
+        e.send_default();
+    }
+}
+
+fn toggle_wireframe(
+    mut commands: Commands,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+    with: Query<Entity, With<Wireframe>>,
+    without: Query<Entity, (Without<Wireframe>, With<Meshy>)>,
+    mut events: EventReader<ToggleWireframe>,
+) {
+    for _ in events.iter() {
+        if let Ok(ent) = with.get_single() {
+            commands.entity(ent).remove::<Wireframe>();
+            for (_, material) in materials.iter_mut() {
+                material.base_color.set_a(1.0);
+            }
+        } else if let Ok(ent) = without.get_single() {
+            commands.entity(ent).insert(Wireframe);
+            for (_, material) in materials.iter_mut() {
+                material.base_color.set_a(0.0);
+            }
+        }
+    }
+}
+
+fn input_handler_rotation(
+    keyboard_input: Res<Input<KeyCode>>,
+    mut query: Query<&mut Transform, With<Camera>>,
+    time: Res<Time>,
+) {
+    let t = query.get_single_mut().unwrap().into_inner();
+    if keyboard_input.pressed(KeyCode::Space) {
+        t.translation += Vec3::Y * SPEED * time.delta_seconds();
+    }
+    if keyboard_input.pressed(KeyCode::ShiftLeft) {
+        t.translation += Vec3::NEG_Y * SPEED * time.delta_seconds();
+    }
+    if keyboard_input.pressed(KeyCode::S) {
+        t.translation += t.back() * SPEED * time.delta_seconds();
+    }
+    if keyboard_input.pressed(KeyCode::W) {
+        t.translation += t.forward() * SPEED * time.delta_seconds();
+    }
+    if keyboard_input.pressed(KeyCode::A) {
+        t.translation += t.left() * SPEED * time.delta_seconds();
+    }
+    if keyboard_input.pressed(KeyCode::D) {
+        t.translation += t.right() * SPEED * time.delta_seconds();
+    }
+    t.look_at(
+        Vec3::new(
+            FACTOR as f32 * 0.5,
+            FACTOR as f32 * 0.5,
+            FACTOR as f32 * 0.5,
+        ),
+        Vec3::Y,
+    );
+    // for mut transform in &mut query {
+    //     transform.translation += dir;
+    // }
+}
+
+fn regenerate_mesh(
+    mut meshy: Query<&mut Meshy>,
+    breg: Res<BlockRegistry>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mesh_query: Query<&Handle<Mesh>>,
+    mut event_reader: EventReader<RegenerateMesh>,
+    mut text_query: Query<&mut Text, With<MeshInfo>>,
+) {
+    for _ in event_reader.iter() {
+        let mesh = meshes
+            .get_mut(mesh_query.get_single().unwrap())
+            .expect("Couldn't get a mut ref to the mesh");
+        let grid: Vec<u16> = vec![1; FACTOR * FACTOR * FACTOR];
+        let dims: Dimensions = (FACTOR, FACTOR, FACTOR);
+
+        let m = meshy.get_single_mut().unwrap().into_inner();
+        let t = text_query.get_single_mut().unwrap().into_inner();
+        match m.ma {
+            MeshingAlgorithm::Culling => m.ma = MeshingAlgorithm::Stupid,
+            MeshingAlgorithm::Stupid => m.ma = MeshingAlgorithm::Culling,
+        }
+
+        *mesh = meshem(dims, grid, breg.into_inner(), m.ma.clone()).unwrap();
+
+        t.sections[0].value = format!("Press -C- To regenerate the mesh with a different Algorithm\nVertices Count: {}\nMeshing Algorithm: {:?}",mesh.count_vertices(),m.ma);
+        return;
     }
 }
