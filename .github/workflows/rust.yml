@@ -23,4 +23,12 @@ jobs:
         sudo apt-get install libudev-dev
     - name: Build
       run: cargo build --verbose
+    - name: Build and run examples
+      run: |
+        cd examples
+          for example in $(find . -type f -name '*.rs'); do
+            example_name=$(basename "$example" .rs)
+            echo "Building and running example: $example_name"
+            cargo check --example "$example_name"
+          done
 
