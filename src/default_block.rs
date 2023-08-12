@@ -1,3 +1,5 @@
+//! A module containing the "default block", it is used in the examples,
+//! it is simple and easy to work with.
 use bevy::prelude::*;
 use bevy::render::mesh::{
     Indices, MeshVertexAttribute, MeshVertexAttributeId, VertexAttributeValues,
@@ -5,6 +7,7 @@ use bevy::render::mesh::{
 use bevy::render::render_resource::PrimitiveTopology;
 use bevy::utils::hashbrown::HashMap;
 
+/// Function that generates the block.
 pub fn default_block() -> Mesh {
     let mut cube_mesh = Mesh::new(PrimitiveTopology::TriangleList);
 

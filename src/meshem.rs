@@ -1,4 +1,4 @@
-//! This file contains the function itself, and some added utilities and defs.
+//! This module contains the main functions themself, and some added utilities and defs.
 use super::{Dimensions, Neighbors, VoxelRegistry};
 use crate::util::vav::*;
 use bevy::prelude::*;
@@ -8,6 +8,7 @@ use bevy::render::mesh::{
 use bevy::render::render_resource::PrimitiveTopology;
 use bevy::utils::hashbrown::HashMap;
 
+/// All the variants for the Meshing algorithm.
 #[derive(Debug, Clone)]
 pub enum MeshingAlgorithm {
     Stupid,
@@ -25,10 +26,11 @@ pub enum MeshingAlgorithm {
 ///     An example to create a [`VoxelRegistry`] is in the examples folder.
 /// - ['ma'](MeshingAlgorithm): The meshing algorithm to use - currently supports Culling and
 ///     Stupid. (Culling is always better than Stupid)
+///
 /// Return:
 /// - [`Some(mesh)`](Mesh): the mesh
 /// - [`None`]: couldn't create mesh
-pub fn meshem<T>(
+pub fn mesh_grid<T>(
     dims: Dimensions,
     grid: Vec<T>,
     reg: &impl VoxelRegistry<Voxel = T>,
@@ -66,7 +68,12 @@ pub fn meshem<T>(
                 let forward = cord.checked_sub(width).unwrap_or(usize::MAX);
                 let mut neig = [false; 6];
                 let center = reg.get_center();
-                let position_offset = (i, k, j);
+                let voxel_dims = reg.get_voxel_dimensions();
+                let position_offset = (
+                    i as f32 * voxel_dims[0],
+                    k as f32 * voxel_dims[1],
+                    j as f32 * voxel_dims[0],
+                );
 
                 if in_range(k + 1, 0, height) {
                     neig[0] = !reg.is_voxel(&grid[above]);
@@ -109,6 +116,8 @@ pub fn meshem<T>(
                 }
                 if in_range(cord, 0, t) {
                     if let Some(v_mesh) = reg.get_mesh(&grid[cord]) {
+                        // add_vertices() is a private function that adds the verices and
+                        // indices to the running count of vertices and indices.
                         add_vertices(
                             neig,
                             &mut indices,
@@ -141,7 +150,7 @@ fn add_vertices(
     vertices: &mut Vec<(MeshVertexAttribute, VertexAttributeValues)>,
     voxel: &Mesh,
     center: [f32; 3],
-    position_offset: (usize, usize, usize),
+    position_offset: (f32, f32, f32),
 ) {
     let vertices_count = vertices[0].1.len();
     let pos_attribute = voxel

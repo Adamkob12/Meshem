@@ -1,20 +1,28 @@
 #![allow(dead_code, unused_imports, unused_variables)]
 pub mod default_block;
 pub mod meshem;
-mod util;
+pub mod util;
 
-pub use crate::default_block::*;
-pub use crate::meshem::*;
+use crate::default_block::*;
+use crate::meshem::*;
 use bevy::render::mesh::{
     Indices, Mesh, MeshVertexAttribute, MeshVertexAttributeId, VertexAttributeValues,
 };
 
+/// Implementing this trait for a your own data-structure is the most important
+/// prerequesite if you want to use the function.
 pub trait VoxelRegistry {
     type Voxel;
-    /// returns None if the mesh is "irrelevant" as in it's air or not a Voxel.
+    /// Returns None if the mesh is "irrelevant" as in it's air or not a Voxel.
     fn get_mesh(&self, voxel: &Self::Voxel) -> Option<&Mesh>;
+    /// Should the algorithm consider this Voxel "full"?, for example, in Minecraft,
+    /// "Air" would not be a full block because it doesn't block the view.
     fn is_voxel(&self, voxel: &Self::Voxel) -> bool;
+    /// The center of the voxel (physical center, the center of the default block is 0,0,0 eg)
     fn get_center(&self) -> [f32; 3];
+    /// All the voxels must have standard and equal dimesions (y is up).
+    fn get_voxel_dimensions(&self) -> [f32; 3];
+    /// The attributes we are considering while meshing the grid.
     fn all_attributes(&self) -> Vec<MeshVertexAttribute>;
 }
 

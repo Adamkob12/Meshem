@@ -14,22 +14,16 @@ pub(crate) trait VAVutils {
     fn extend(&mut self, t: &Self);
     fn filter_bool_array(&self, index_filter: Vec<bool>) -> Self;
     fn new(format: VertexFormat) -> VertexAttributeValues;
-    fn offset_all(&self, offset: (usize, usize, usize)) -> VertexAttributeValues;
+    fn offset_all(&self, offset: (f32, f32, f32)) -> VertexAttributeValues;
 }
 
 impl VAVutils for VertexAttributeValues {
-    fn offset_all(&self, offset: (usize, usize, usize)) -> VertexAttributeValues {
+    fn offset_all(&self, offset: (f32, f32, f32)) -> VertexAttributeValues {
         match self {
             VertexAttributeValues::Float32x3(vals) => {
                 return VertexAttributeValues::Float32x3(
                     vals.iter()
-                        .map(|[x, y, z]| {
-                            [
-                                x + offset.0 as f32,
-                                y + offset.1 as f32,
-                                z + offset.2 as f32,
-                            ]
-                        })
+                        .map(|[x, y, z]| [x + offset.0, y + offset.1, z + offset.2])
                         .collect(),
                 );
             }

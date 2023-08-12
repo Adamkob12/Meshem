@@ -2,6 +2,11 @@
 name = "bevy_meshem"
 version = "0.1.0"
 edition = "2021"
+authors = ["Adam Kobzan <kobzan.adam@gmail.com>"]
+description = "A crate that offers a flexible and efficient way to generate meshes from a grid of Voxels"
+license = "MIT"
+repository = "https://github.com/Adamkob12/bevy_meshem"
+documentation = "https://docs.rs/bevy_meshem"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

@@ -64,7 +64,7 @@ fn setup(
     let grid: Vec<u16> = vec![1; FACTOR * FACTOR * FACTOR];
     let dims: Dimensions = (FACTOR, FACTOR, FACTOR);
 
-    let culled_mesh = meshem(dims, grid, breg.into_inner(), MESHING_ALGORITHM).unwrap();
+    let culled_mesh = mesh_grid(dims, grid, breg.into_inner(), MESHING_ALGORITHM).unwrap();
     let culled_mesh_handle: Handle<Mesh> = meshes.add(culled_mesh.clone());
     commands.spawn((
         PbrBundle {
@@ -180,6 +180,10 @@ impl VoxelRegistry for BlockRegistry {
     /// The center of the Mesh, out mesh is defined in src/default_block.rs, just a constant.
     fn get_center(&self) -> [f32; 3] {
         return [0.0, 0.0, 0.0];
+    }
+    /// The dimensions of the Mesh, out mesh is defined in src/default_block.rs, just a constant.
+    fn get_voxel_dimensions(&self) -> [f32; 3] {
+        return [1.0, 1.0, 1.0];
     }
     /// The attributes we want to take from out voxels, note that using a lot of different
     /// attributes will likely lead to performance problems and unpredictible behaviour.
@@ -312,7 +316,7 @@ fn regenerate_mesh(
             MeshingAlgorithm::Stupid => m.ma = MeshingAlgorithm::Culling,
         }
 
-        *mesh = meshem(dims, grid, breg.into_inner(), m.ma.clone()).unwrap();
+        *mesh = mesh_grid(dims, grid, breg.into_inner(), m.ma.clone()).unwrap();
 
         t.sections[0].value = format!("Press -C- To regenerate the mesh with a different Algorithm\nVertices Count: {}\nMeshing Algorithm: {:?}",mesh.count_vertices(),m.ma);
         return;
