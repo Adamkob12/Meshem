@@ -19,13 +19,15 @@ Bevy Meshem focuses on performance, utilizing Rust's performance benefits to cre
 
 ### "The Stupid Method" 
 Iterate over the grid and generate a matching cube for each voxel (Also reffered to as the "default" as this method doesn't offer any optimization) examples: (screenshots from examples/simple_example.rs)
-![Screen Shot 2023-08-12 at 1 56 08](https://github.com/Adamkob12/bevy_meshem/assets/46227443/9057fb03-9002-44f5-bbe8-f4525130ed67)
+![Screen Shot 2023-08-12 at 1 56 08](https://github.com/Adamkob12/bevy_meshem/assets/46227443/9c1d82c4-fad6-4866-b256-9ac273525c19)
+
 10x10x10 grid, each voxel is built out of 24 vertices, and the entire mesh is built out of 24000 (expected, 24 * 10 * 10 * 10)
 
 ### "Culling"
 A slightly more sophisticated method, while iterating over the grid, we don't add any vertices and indices that are hidden behind other voxels. This is roughly the method that Minecraft uses in its
 engine, though the specifics are obviously unknown. examples:
-![Screen Shot 2023-08-12 at 2 05 20](https://github.com/Adamkob12/bevy_meshem/assets/46227443/205126a1-1fec-4c02-a9be-a6d6ad965059)
+![Screen Shot 2023-08-12 at 2 05 20](https://github.com/Adamkob12/bevy_meshem/assets/46227443/d8696c49-dfd9-400b-837b-641925154f63)
+
 10x10x10 grid, but in contrast to The Stupid Method, only 2400 are rendered.
 
 ### Not supported: "Greedy Meshing"
