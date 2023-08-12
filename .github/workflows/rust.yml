@@ -27,6 +27,7 @@ jobs:
       run: |
         cd examples
         for example in $(ls *.rs); do
+          example_name="${example%.rs}"
           echo "Building and running example: $example"
           cargo run --example $example
         done
