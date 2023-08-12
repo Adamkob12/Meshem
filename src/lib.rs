@@ -1,7 +1,7 @@
 #![allow(dead_code, unused_imports, unused_variables)]
 pub mod default_block;
 pub mod meshem;
-pub mod util;
+mod util;
 
 use crate::default_block::*;
 use crate::meshem::*;
