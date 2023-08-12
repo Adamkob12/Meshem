@@ -7,7 +7,7 @@ use bevy_meshem::meshem::*;
 use bevy_meshem::*;
 
 /// Constants for us to use.
-const FACTOR: usize = 15;
+const FACTOR: usize = 10;
 const SPEED: f32 = FACTOR as f32 * 2.0;
 const MESHING_ALGORITHM: MeshingAlgorithm = MeshingAlgorithm::Culling;
 
