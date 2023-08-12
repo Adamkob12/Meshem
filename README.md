@@ -28,7 +28,7 @@ Iterate over the grid and generate a matching cube for each voxel (Also reffered
 ### "Culling"
 A slightly more sophisticated method, while iterating over the grid, we don't add any vertices and indices that are hidden behind other voxels. This is roughly the method that Minecraft uses in its
 engine, though the specifics are obviously unknown. examples:
-![Screen Shot 2023-08-12 at 2 05 20](assets/Screenshots/ScreenshotsC.png)
+![Screen Shot 2023-08-12 at 2 05 20](assets/Screenshots/ScreenshotC.png)
 
 10x10x10 grid, but in contrast to The Stupid Method, only 2400 are rendered.
 
