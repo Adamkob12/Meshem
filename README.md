@@ -57,4 +57,5 @@ As a result, it may have some stability challenges. However, your contributions 
 ## Credits
 Thanks to mikollysenko writing this informative article!
 https://0fps.net/2012/06/30/meshing-in-a-minecraft-game/
+And to the Bevy Community, for building an awesome project!
 
