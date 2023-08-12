@@ -33,7 +33,7 @@ Greedy Meshing is even more effecient than Culling, but it makes very limiting c
 
 ## Requirements & Installation
 - You must be familliar with the Bevy game engine, and of course the Rust programming language.
-- You know the drill – sacrifice a goat and add this incantation to your project's Cargo.toml file:
+- You know the drill - add this incantation to your project's Cargo.toml file:
   ```toml
   [dependencies]
   bevy_meshem = "0.1.0"
