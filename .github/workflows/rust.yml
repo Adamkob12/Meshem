@@ -26,9 +26,9 @@ jobs:
     - name: Build and run examples
       run: |
         cd examples
-        for example in $(ls *.rs); do
-          example_name="${example%.rs}"
-          echo "Building and running example: $example"
-          cargo run --example $example
-        done
+          for example in $(find . -type f -name '*.rs'); do
+            example_name=$(basename "$example" .rs)
+            echo "Building and running example: $example_name"
+            cargo run --example "$example_name"
+          done
 
