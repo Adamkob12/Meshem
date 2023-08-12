@@ -16,10 +16,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - name: Install ALSA library
+    - name: Install Libraries
       run: |
         sudo apt update
         sudo apt install -y libasound2-dev
+        sudo apt-get install libudev-dev
     - name: Build
       run: cargo build --verbose
 
