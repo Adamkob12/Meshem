@@ -1,6 +1,6 @@
 # Bevy Meshem
-[![Crates.io]()](https://crates.io/crates/bevy_meshem)
-[![docs]()](https://docs.rs/bevy_meshem)
+[Crates.io](https://crates.io/crates/bevy_meshem),
+[docs](https://docs.rs/bevy_meshem)
 
 Bevy Meshem is a Rust crate designed to provide meshing algorithms for voxel grids, enabling you to create cohesive 3D mesh structures from a grid of cubic voxels.
 Similar to the mechanics in Minecraft, Bevy Meshem offers a powerful and flexible way to visualize voxel-based environments with efficient mesh generation.
