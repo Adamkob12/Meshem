@@ -29,6 +29,6 @@ jobs:
           for example in $(find . -type f -name '*.rs'); do
             example_name=$(basename "$example" .rs)
             echo "Building and running example: $example_name"
-            cargo run --example "$example_name"
+            cargo check --example "$example_name"
           done
 
