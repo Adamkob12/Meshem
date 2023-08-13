@@ -11,7 +11,7 @@ use bevy::utils::hashbrown::HashMap;
 /// All the variants for the Meshing algorithm.
 #[derive(Debug, Clone)]
 pub enum MeshingAlgorithm {
-    Stupid,
+    Naive,
     Culling,
 }
 
@@ -25,7 +25,7 @@ pub enum MeshingAlgorithm {
 ///     if this condition is not met, the grid will not be properly meshified.
 ///     An example to create a [`VoxelRegistry`] is in the examples folder.
 /// - ['ma'](MeshingAlgorithm): The meshing algorithm to use - currently supports Culling and
-///     Stupid. (Culling is always better than Stupid)
+///     Naive. (Culling is always better than Naive)
 ///
 /// Return:
 /// - [`Some(mesh)`](Mesh): the mesh
@@ -107,7 +107,7 @@ pub fn mesh_grid<T>(
                 }
 
                 match ma {
-                    MeshingAlgorithm::Stupid => neig = [true; 6],
+                    MeshingAlgorithm::Naive => neig = [true; 6],
                     MeshingAlgorithm::Culling => {}
                 }
 

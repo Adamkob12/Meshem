@@ -312,8 +312,8 @@ fn regenerate_mesh(
         let m = meshy.get_single_mut().unwrap().into_inner();
         let t = text_query.get_single_mut().unwrap().into_inner();
         match m.ma {
-            MeshingAlgorithm::Culling => m.ma = MeshingAlgorithm::Stupid,
-            MeshingAlgorithm::Stupid => m.ma = MeshingAlgorithm::Culling,
+            MeshingAlgorithm::Culling => m.ma = MeshingAlgorithm::Naive,
+            MeshingAlgorithm::Naive => m.ma = MeshingAlgorithm::Culling,
         }
 
         *mesh = mesh_grid(dims, grid, breg.into_inner(), m.ma.clone()).unwrap();
