@@ -21,14 +21,14 @@ Bevy Meshem focuses on performance, utilizing Rust's performance benefits to cre
 
 ### "The Naive Method" 
 Iterate over the grid and generate a matching cube for each voxel (Also reffered to as the "default" as this method doesn't offer any optimization) examples: (screenshots from examples/simple_example.rs)
-![Screen Shot 2023-08-12 at 1 56 08](assets/Screenshots/ScreenshotS.png)
+![Naive method screenshot](assets/Screenshots/ScreenshotS.png)
 
 10x10x10 grid, each voxel is built out of 24 vertices, and the entire mesh is built out of 24000 (expected, 24 * 10 * 10 * 10)
 
 ### "Culling"
 A slightly more sophisticated method, while iterating over the grid, we don't add any vertices and indices that are hidden behind other voxels. This is roughly the method that Minecraft uses in its
 engine, though the specifics are obviously unknown. examples:
-![Screen Shot 2023-08-12 at 2 05 20](assets/Screenshots/ScreenshotC.png)
+![Culling method screenshot](assets/Screenshots/ScreenshotC.png)
 
 10x10x10 grid, but in contrast to The Naive Method, only 2400 are rendered.
 

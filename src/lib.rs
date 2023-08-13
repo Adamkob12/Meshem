@@ -9,7 +9,7 @@ use bevy::render::mesh::{
     Indices, Mesh, MeshVertexAttribute, MeshVertexAttributeId, VertexAttributeValues,
 };
 
-/// Implementing this trait for a your own data-structure is the most important
+/// Implementing this trait for your own data-structure is the most important
 /// prerequesite if you want to use the function.
 pub trait VoxelRegistry {
     type Voxel;
