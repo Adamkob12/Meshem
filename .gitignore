@@ -4,6 +4,7 @@
 *.swp
 *.swo
 .helix/*
+*.excalidraw
 
 /target
 Cargo.lock
