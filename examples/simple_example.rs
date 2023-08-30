@@ -7,7 +7,7 @@ use bevy_meshem::meshem::*;
 use bevy_meshem::*;
 
 /// Constants for us to use.
-const FACTOR: usize = 10;
+const FACTOR: usize = 3;
 const SPEED: f32 = FACTOR as f32 * 2.0;
 const MESHING_ALGORITHM: MeshingAlgorithm = MeshingAlgorithm::Culling;
 
@@ -64,7 +64,8 @@ fn setup(
     let grid: Vec<u16> = vec![1; FACTOR * FACTOR * FACTOR];
     let dims: Dimensions = (FACTOR, FACTOR, FACTOR);
 
-    let culled_mesh = mesh_grid(dims, grid, breg.into_inner(), MESHING_ALGORITHM).unwrap();
+    let (culled_mesh, _meta_data) =
+        mesh_grid(dims, grid, breg.into_inner(), MESHING_ALGORITHM).unwrap();
     let culled_mesh_handle: Handle<Mesh> = meshes.add(culled_mesh.clone());
     commands.spawn((
         PbrBundle {
@@ -316,7 +317,9 @@ fn regenerate_mesh(
             MeshingAlgorithm::Naive => m.ma = MeshingAlgorithm::Culling,
         }
 
-        *mesh = mesh_grid(dims, grid, breg.into_inner(), m.ma.clone()).unwrap();
+        *mesh = mesh_grid(dims, grid, breg.into_inner(), m.ma.clone())
+            .unwrap()
+            .0;
 
         t.sections[0].value = format!("Press -C- To regenerate the mesh with a different Algorithm\nVertices Count: {}\nMeshing Algorithm: {:?}",mesh.count_vertices(),m.ma);
         return;

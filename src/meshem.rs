@@ -1,12 +1,13 @@
 //! This module contains the main functions themself, and some added utilities and defs.
+use super::dynamic_mesh::*;
 use super::{Dimensions, Neighbors, VoxelRegistry};
 use crate::util::vav::*;
+use crate::{face_to_u32, Face, Face::*};
 use bevy::prelude::*;
 use bevy::render::mesh::{
     Indices, MeshVertexAttribute, MeshVertexAttributeId, VertexAttributeValues,
 };
 use bevy::render::render_resource::PrimitiveTopology;
-use bevy::utils::hashbrown::HashMap;
 
 /// All the variants for the Meshing algorithm.
 #[derive(Debug, Clone)]
@@ -35,9 +36,10 @@ pub fn mesh_grid<T>(
     grid: Vec<T>,
     reg: &impl VoxelRegistry<Voxel = T>,
     ma: MeshingAlgorithm,
-) -> Option<Mesh> {
+) -> Option<(Mesh, MeshMD<T>)> {
     let mut mesh = Mesh::new(PrimitiveTopology::TriangleList);
     let ch_len = grid.len();
+    let mut vivi = vec![vec![]; ch_len];
     assert_eq!(
         ch_len,
         dims.0 * dims.1 * dims.2,
@@ -56,10 +58,11 @@ pub fn mesh_grid<T>(
         vertices.push((att.clone(), VertexAttributeValues::new(att.format.clone())));
     }
 
-    for i in 0..width {
+    for k in 0..height {
         for j in 0..length {
-            for k in 0..height {
+            for i in 0..width {
                 let cord = k * length * width + j * width + i;
+                // print!("{} , ", cord);
                 let above = cord + length * width;
                 let below = cord.checked_sub(width * length).unwrap_or(usize::MAX);
                 let right = cord + 1;
@@ -116,13 +119,15 @@ pub fn mesh_grid<T>(
                 }
                 if in_range(cord, 0, t) {
                     if let Some(v_mesh) = reg.get_mesh(&grid[cord]) {
-                        // add_vertices() is a private function that adds the verices and
+                        // add_vertices() is a private function that adds the vertices and
                         // indices to the running count of vertices and indices.
                         add_vertices(
                             neig,
                             &mut indices,
                             &mut vertices,
                             v_mesh,
+                            &mut vivi,
+                            cord,
                             center,
                             position_offset,
                         );
@@ -136,8 +141,14 @@ pub fn mesh_grid<T>(
         mesh.insert_attribute(att, vals);
     }
     mesh.set_indices(Some(Indices::U32(indices)));
+    dbg!(&vivi);
+    let d_mesh = MeshMD {
+        dims,
+        vivi,
+        changed_voxels: vec![],
+    };
 
-    Some(mesh)
+    Some((mesh, d_mesh))
 }
 
 /// Important helper function to add the vertices and indices of each voxel into the running count of vertices
@@ -149,6 +160,8 @@ fn add_vertices(
     indices_main: &mut Vec<u32>,
     vertices: &mut Vec<(MeshVertexAttribute, VertexAttributeValues)>,
     voxel: &Mesh,
+    vivi: &mut VIVI,
+    voxel_index: usize,
     center: [f32; 3],
     position_offset: (f32, f32, f32),
 ) {
@@ -157,7 +170,7 @@ fn add_vertices(
         .attribute(Mesh::ATTRIBUTE_POSITION)
         .expect("couldn't get voxel mesh data");
     let VertexAttributeValues::Float32x3(positions) = pos_attribute else {
-        panic!("Unexpected vertex format, expected Float32x3.");
+        panic!("Unexpected vertex format for position attribute, expected Float32x3.");
     };
     let Indices::U32(indices) = voxel.indices()
         .expect("couldn't get indices data") else {
@@ -167,71 +180,113 @@ fn add_vertices(
         .chunks(3)
         .map(|chunk| (chunk[0], chunk[1], chunk[2]));
 
+    // define the indices and vertices we want to save of the voxel mesh
     let mut indices_to_save: Vec<u32> = vec![];
-    let mut vertices_to_save: Vec<(bool, u32)> = vec![(false, 0); positions.len()];
+    // helper data structure
+    let mut vertices_to_save: Vec<(bool, u32, Face)> = vec![(false, 0, Face::Top); positions.len()];
+    // sorted vertices by the quad they are in
+    let mut sorted_vertices: Vec<Option<Vec<u32>>> = vec![None; 6];
+    // the final array of the vertices, it will be sorted, each 4 vertices will be a
+    // part of one quad, we sort them this way to efficiently update the vivi.
+    let mut final_vertices: Vec<u32> = vec![];
 
+    // iterate over all the triangles in the mesh
     for (a, b, c) in triangles {
         let v1 = positions[a as usize];
         let v2 = positions[b as usize];
         let v3 = positions[c as usize];
-        let mut save = false;
+        let mut save = (false, Top);
 
+        // see which side of the voxel the triangle belongs to
         for i in 0..3 {
             if v1[i] == v2[i] && v2[i] == v3[i] && v1[i] == v3[i] {
                 match (i, center[i] > v1[i]) {
-                    (0, true) if neig[3] => save = true,
-                    (0, false) if neig[2] => save = true,
-                    (1, true) if neig[1] => save = true,
-                    (1, false) if neig[0] => save = true,
-                    (2, true) if neig[5] => save = true,
-                    (2, false) if neig[4] => save = true,
-                    _ => save = false,
+                    (0, true) if neig[3] => save = (true, Left),
+                    (0, false) if neig[2] => save = (true, Right),
+                    (1, true) if neig[1] => save = (true, Bottom),
+                    (1, false) if neig[0] => save = (true, Top),
+                    (2, true) if neig[5] => save = (true, Forward),
+                    (2, false) if neig[4] => save = (true, Back),
+                    _ => save = (false, Top),
                 }
+                break;
             }
         }
 
-        if save {
+        // save the vertices
+        if save.0 {
+            let quad: usize = save.1.into();
             indices_to_save.push(a);
             indices_to_save.push(b);
             indices_to_save.push(c);
-            vertices_to_save[a as usize].0 = true;
-            vertices_to_save[b as usize].0 = true;
-            vertices_to_save[c as usize].0 = true;
-        }
-    }
-
-    let mut offset = 0;
-    for (b, i) in vertices_to_save.iter_mut() {
-        *i = offset;
-        if !*b {
-            offset += 1;
-        }
-    }
-
-    for i in indices_to_save.iter_mut() {
-        *i -= vertices_to_save[*i as usize].1;
-        *i += vertices_count as u32;
-    }
-
-    for (id, vals) in voxel.attributes() {
-        let mut i = 0;
-        i = {
-            while id != vertices[i].0.id {
-                i += 1;
+            match sorted_vertices[quad] {
+                None => {
+                    sorted_vertices[quad] = Some(vec![a, b, c]);
+                    vertices_to_save[a as usize].0 = true;
+                    vertices_to_save[b as usize].0 = true;
+                    vertices_to_save[c as usize].0 = true;
+                    vertices_to_save[a as usize].1 = 0;
+                    vertices_to_save[b as usize].1 = 1;
+                    vertices_to_save[c as usize].1 = 2;
+                    vertices_to_save[a as usize].2 = save.1;
+                    vertices_to_save[b as usize].2 = save.1;
+                    vertices_to_save[c as usize].2 = save.1;
+                }
+                Some(ref mut v) => {
+                    for &i in [a, b, c].iter() {
+                        if !vertices_to_save[i as usize].0 {
+                            v.push(i);
+                            vertices_to_save[i as usize].2 = save.1;
+                            vertices_to_save[i as usize].1 = v.len() as u32 - 1;
+                            vertices_to_save[i as usize].0 = true;
+                        }
+                    }
+                }
             }
-            i
-        };
-        if id == Mesh::ATTRIBUTE_POSITION.id {
-            vertices[i].1.extend(
-                &vals
-                    .filter_bool_array(vertices_to_save.iter().map(|(b, x)| *b).collect())
-                    .offset_all(position_offset),
-            );
-        } else {
-            vertices[i].1.extend(
-                &vals.filter_bool_array(vertices_to_save.iter().map(|(b, x)| *b).collect()),
-            );
         }
+    }
+
+    // The code from now on is a little messy, but it is very simple in actuality. It is mostly
+    // just offseting the vertices and indices and formatting them into the right data-structres.
+
+    // offset the vertices, since we won't be using all the vertices of the the mesh,
+    // we need to find out which of them we will be using first, and then filter out
+    // the ones we dont need.
+    let mut offset: u32 = 0;
+    for q in sorted_vertices.iter() {
+        match q {
+            None => offset += 4,
+            Some(ref v) => {
+                let mut only_first = true;
+                for &i in v.iter() {
+                    let face = vertices_to_save[i as usize].2;
+                    vertices_to_save[i as usize].1 += face as u32 * 4 - offset;
+                    final_vertices.push(i);
+                    // update the vivi
+                    if only_first {
+                        vivi[voxel_index].push((i + vertices_count as u32) | face_to_u32(face));
+                        only_first = false;
+                    }
+                }
+            }
+        }
+    }
+
+    // offset the indices, we need to consider the fact that the indices wil be part of a big mesh,
+    // with a lot of vertices, so we must the vertices to a running count and offset them accordingly.
+    for i in indices_to_save.iter_mut() {
+        *i = vertices_to_save[*i as usize].1 + vertices_count as u32;
+    }
+
+    for (id, vals) in vertices.iter_mut() {
+        let mut att = voxel
+            .attribute(id.id)
+            .expect(format!("Couldn't retrieve voxel mesh attribute {:?}.", id).as_str())
+            .get_needed(&final_vertices);
+        if id.id == Mesh::ATTRIBUTE_POSITION.id {
+            att = att.offset_all(position_offset);
+        }
+        vals.extend(&att);
     }
     indices_main.extend(indices_to_save);
 }
