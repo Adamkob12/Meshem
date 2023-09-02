@@ -53,10 +53,11 @@ pub fn mesh_grid<T>(
     let t = width * length * height;
 
     let mut indices: Vec<u32> = vec![];
-    let mut vertices: Vec<(MeshVertexAttribute, VertexAttributeValues)> = vec![];
     for att in reg.all_attributes().iter() {
-        vertices.push((att.clone(), VertexAttributeValues::new(att.format.clone())));
+        mesh.insert_attribute(att.clone(), VertexAttributeValues::new(att.format));
     }
+    let mut vertices: Vec<(MeshVertexAttributeId, &mut VertexAttributeValues)> =
+        mesh.attributes_mut().collect();
 
     for k in 0..height {
         for j in 0..length {
@@ -121,7 +122,7 @@ pub fn mesh_grid<T>(
                     if let Some(v_mesh) = reg.get_mesh(&grid[cord]) {
                         // add_vertices() is a private function that adds the vertices and
                         // indices to the running count of vertices and indices.
-                        add_vertices(
+                        add_voxel(
                             neig,
                             &mut indices,
                             &mut vertices,
@@ -137,9 +138,6 @@ pub fn mesh_grid<T>(
         }
     }
 
-    for (att, vals) in vertices {
-        mesh.insert_attribute(att, vals);
-    }
     mesh.set_indices(Some(Indices::U32(indices)));
     dbg!(&vivi);
     let d_mesh = MeshMD {
@@ -155,10 +153,10 @@ pub fn mesh_grid<T>(
 /// and indices, preserving their attributes, and (important!) assigning a custom offset to the
 /// position attributes, we are assuming this is only needed for the position attributes (because
 /// it usually is).
-fn add_vertices(
+fn add_voxel(
     neig: Neighbors,
     indices_main: &mut Vec<u32>,
-    vertices: &mut Vec<(MeshVertexAttribute, VertexAttributeValues)>,
+    vertices: &mut Vec<(MeshVertexAttributeId, &mut VertexAttributeValues)>,
     voxel: &Mesh,
     vivi: &mut VIVI,
     voxel_index: usize,
@@ -280,10 +278,10 @@ fn add_vertices(
 
     for (id, vals) in vertices.iter_mut() {
         let mut att = voxel
-            .attribute(id.id)
+            .attribute(*id)
             .expect(format!("Couldn't retrieve voxel mesh attribute {:?}.", id).as_str())
             .get_needed(&final_vertices);
-        if id.id == Mesh::ATTRIBUTE_POSITION.id {
+        if *id == Mesh::ATTRIBUTE_POSITION.id {
             att = att.offset_all(position_offset);
         }
         vals.extend(&att);

@@ -13,6 +13,7 @@ pub enum VoxelChange {
     Broken,
     Added,
 }
+
 /// Mesh meta-data struct.
 /// T is the voxel type, it needs to be the same as the voxel registry.
 pub struct MeshMD<T> {
