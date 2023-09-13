@@ -16,6 +16,7 @@ pub(crate) trait VAVutils {
     // and returns the needed values in the same order.
     fn get_needed(&self, needed_values: &Vec<u32>) -> VertexAttributeValues;
     fn swap_remove(&mut self, index: usize);
+    fn remove(&mut self, index: usize);
 }
 
 impl VAVutils for VertexAttributeValues {
@@ -172,6 +173,151 @@ impl VAVutils for VertexAttributeValues {
             VertexAttributeValues::Unorm8x4(ref mut vals) => {
                 if index < vals.len() {
                     vals.swap_remove(index);
+                }
+            }
+        }
+    }
+
+    fn remove(&mut self, index: usize) {
+        match self {
+            VertexAttributeValues::Float32(ref mut vals) => {
+                if index < vals.len() {
+                    vals.remove(index);
+                }
+            }
+            VertexAttributeValues::Sint32(ref mut vals) => {
+                if index < vals.len() {
+                    vals.remove(index);
+                }
+            }
+            VertexAttributeValues::Uint32(ref mut vals) => {
+                if index < vals.len() {
+                    vals.remove(index);
+                }
+            }
+            VertexAttributeValues::Float32x2(ref mut vals) => {
+                if index < vals.len() {
+                    vals.remove(index);
+                }
+            }
+            VertexAttributeValues::Sint32x2(ref mut vals) => {
+                if index < vals.len() {
+                    vals.remove(index);
+                }
+            }
+            VertexAttributeValues::Uint32x2(ref mut vals) => {
+                if index < vals.len() {
+                    vals.remove(index);
+                }
+            }
+            VertexAttributeValues::Float32x3(ref mut vals) => {
+                if index < vals.len() {
+                    vals.remove(index);
+                }
+            }
+            VertexAttributeValues::Sint32x3(ref mut vals) => {
+                if index < vals.len() {
+                    vals.remove(index);
+                }
+            }
+            VertexAttributeValues::Uint32x3(ref mut vals) => {
+                if index < vals.len() {
+                    vals.remove(index);
+                }
+            }
+            VertexAttributeValues::Float32x4(ref mut vals) => {
+                if index < vals.len() {
+                    vals.remove(index);
+                }
+            }
+            VertexAttributeValues::Sint32x4(ref mut vals) => {
+                if index < vals.len() {
+                    vals.remove(index);
+                }
+            }
+            VertexAttributeValues::Uint32x4(ref mut vals) => {
+                if index < vals.len() {
+                    vals.remove(index);
+                }
+            }
+            VertexAttributeValues::Sint16x2(ref mut vals) => {
+                if index < vals.len() {
+                    vals.remove(index);
+                }
+            }
+            VertexAttributeValues::Snorm16x2(ref mut vals) => {
+                if index < vals.len() {
+                    vals.remove(index);
+                }
+            }
+            VertexAttributeValues::Uint16x2(ref mut vals) => {
+                if index < vals.len() {
+                    vals.remove(index);
+                }
+            }
+            VertexAttributeValues::Unorm16x2(ref mut vals) => {
+                if index < vals.len() {
+                    vals.remove(index);
+                }
+            }
+            VertexAttributeValues::Sint16x4(ref mut vals) => {
+                if index < vals.len() {
+                    vals.remove(index);
+                }
+            }
+            VertexAttributeValues::Snorm16x4(ref mut vals) => {
+                if index < vals.len() {
+                    vals.remove(index);
+                }
+            }
+            VertexAttributeValues::Uint16x4(ref mut vals) => {
+                if index < vals.len() {
+                    vals.remove(index);
+                }
+            }
+            VertexAttributeValues::Unorm16x4(ref mut vals) => {
+                if index < vals.len() {
+                    vals.remove(index);
+                }
+            }
+            VertexAttributeValues::Sint8x2(ref mut vals) => {
+                if index < vals.len() {
+                    vals.remove(index);
+                }
+            }
+            VertexAttributeValues::Snorm8x2(ref mut vals) => {
+                if index < vals.len() {
+                    vals.remove(index);
+                }
+            }
+            VertexAttributeValues::Uint8x2(ref mut vals) => {
+                if index < vals.len() {
+                    vals.remove(index);
+                }
+            }
+            VertexAttributeValues::Unorm8x2(ref mut vals) => {
+                if index < vals.len() {
+                    vals.remove(index);
+                }
+            }
+            VertexAttributeValues::Sint8x4(ref mut vals) => {
+                if index < vals.len() {
+                    vals.remove(index);
+                }
+            }
+            VertexAttributeValues::Snorm8x4(ref mut vals) => {
+                if index < vals.len() {
+                    vals.remove(index);
+                }
+            }
+            VertexAttributeValues::Uint8x4(ref mut vals) => {
+                if index < vals.len() {
+                    vals.remove(index);
+                }
+            }
+            VertexAttributeValues::Unorm8x4(ref mut vals) => {
+                if index < vals.len() {
+                    vals.remove(index);
                 }
             }
         }

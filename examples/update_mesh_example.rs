@@ -10,7 +10,7 @@ use bevy_meshem::*;
 use rand::prelude::*;
 
 /// Constants for us to use.
-const FACTOR: usize = 3;
+const FACTOR: usize = 5;
 const SPEED: f32 = FACTOR as f32 * 2.0;
 const MESHING_ALGORITHM: MeshingAlgorithm = MeshingAlgorithm::Culling;
 
@@ -22,7 +22,7 @@ fn main() {
         block: default_block(),
     })
     .insert_resource(AmbientLight {
-        brightness: 1.5,
+        brightness: 0.3,
         color: Color::WHITE,
     });
 
@@ -32,7 +32,7 @@ fn main() {
             input_handler,
             toggle_wireframe,
             input_handler_rotation,
-            regenerate_mesh,
+            mesh_update,
         ),
     );
 
@@ -65,8 +65,8 @@ fn setup(
     // wireframe_config: ResMut<WireframeConfig>,
     mut meshes: ResMut<Assets<Mesh>>,
 ) {
-    let grid: Vec<u16> = vec![0; FACTOR * FACTOR * FACTOR];
-    let dims: Dimensions = (FACTOR, FACTOR, FACTOR);
+    let grid: Vec<u16> = vec![0; 2 * FACTOR * FACTOR];
+    let dims: Dimensions = (FACTOR, 2, FACTOR);
 
     let (culled_mesh, metadata) =
         mesh_grid(dims, grid.clone(), breg.into_inner(), MESHING_ALGORITHM).unwrap();
@@ -75,7 +75,7 @@ fn setup(
         PbrBundle {
             mesh: culled_mesh_handle,
             material: materials.add(StandardMaterial {
-                base_color: Color::SALMON,
+                base_color: Color::LIME_GREEN,
                 alpha_mode: AlphaMode::Mask(0.5),
                 ..default()
             }),
@@ -111,8 +111,8 @@ fn setup(
     // Light up the scene.
     commands.spawn(PointLightBundle {
         point_light: PointLight {
-            intensity: 5000.0,
-            range: 500.0,
+            intensity: 7000.0,
+            range: 1000.0,
             ..default()
         },
         transform: camera_and_light_transform,
@@ -236,7 +236,7 @@ fn input_handler(
     if keyboard_input.just_pressed(KeyCode::T) {
         event_writer.send_default();
     }
-    if keyboard_input.just_pressed(KeyCode::C) {
+    if keyboard_input.pressed(KeyCode::C) {
         e.send_default();
     }
 }
@@ -301,8 +301,8 @@ fn input_handler_rotation(
     // }
 }
 
-/// System to regenerate the mesh, but using a different algorithm.
-fn regenerate_mesh(
+/// System to add or break random voxels.
+fn mesh_update(
     mut meshy: Query<&mut Meshy>,
     breg: Res<BlockRegistry>,
     mut meshes: ResMut<Assets<Mesh>>,

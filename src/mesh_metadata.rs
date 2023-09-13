@@ -42,7 +42,7 @@ impl VIVI {
         let voxel = self
             .map
             .remove(&(old_vertex as u32))
-            .expect("Couldn't find voxel matching vertex");
+            .expect(format!("Couldn't find voxel matching vertex {}", old_vertex).as_str());
         let q = voxel & !OFFSET_CONST;
         let v = voxel & OFFSET_CONST;
         let old_vertex = old_vertex as u32 | q;
@@ -54,6 +54,27 @@ impl VIVI {
             }
         }
         panic!("Couldn't find vertex index in VIVI");
+    }
+
+    pub(crate) fn remove_quad(&mut self, old_vertex: usize) {
+        let voxel = self
+            .map
+            .remove(&(old_vertex as u32))
+            .expect("Couldn't find voxel matching vertex");
+        let q = voxel & !OFFSET_CONST;
+        let v = voxel & OFFSET_CONST;
+        let old_vertex = old_vertex as u32 | q;
+        let mut r = (false, 0);
+        for (i, j) in self.vivi[v as usize].iter().enumerate() {
+            if *j == old_vertex {
+                r = (true, i);
+            }
+        }
+        if r.0 {
+            self.vivi[v as usize].swap_remove(r.1);
+        } else {
+            panic!("Couldn't find quad from vertex");
+        }
     }
 }
 

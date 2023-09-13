@@ -132,45 +132,38 @@ fn remove_voxel(
             "removing {} at voxel index {}, face {}",
             quad, voxel_index, face as usize
         );
-        for (id, vals) in mesh.attributes_mut() {
-            vals.swap_remove(quad + 3);
-            vals.swap_remove(quad + 2);
-            vals.swap_remove(quad + 1);
-            vals.swap_remove(quad + 0);
+        if quad + 25 >= mesh.count_vertices() {
+            for (id, vals) in mesh.attributes_mut() {
+                vals.remove(quad + 3);
+                vals.remove(quad + 2);
+                vals.remove(quad + 1);
+                vals.remove(quad + 0);
+            }
+            vivi.remove_quad(quad);
+            let mut tmp = quad;
+            while tmp != mesh.count_vertices() {
+                vivi.change_quad_index(tmp + 4, tmp);
+                tmp += 4;
+            }
+        } else {
+            for (id, vals) in mesh.attributes_mut() {
+                vals.swap_remove(quad + 3);
+                vals.swap_remove(quad + 2);
+                vals.swap_remove(quad + 1);
+                vals.swap_remove(quad + 0);
+            }
+            let ver_count = mesh.count_vertices();
+            vivi.remove_quad(quad);
+            vivi.change_quad_index(ver_count, quad);
         }
-        let index = (quad / 4) * 6;
-        let vc = mesh.count_vertices();
+
         let Indices::U32(indices) = mesh.indices_mut()
             .expect("couldn't get indices data") else {
             panic!("Expected U32 indices format");
         };
-        println!("~~~~~");
-        indices.iter().for_each(|&x| print!("{x}, "));
-        println!("~~~~~");
-        println!("{} \n {}", indices.len(), vc);
-        let offset = *indices.last().unwrap() - indices[index + 5];
-        indices.swap_remove(index + 5);
-        indices.swap_remove(index + 4);
-        indices.swap_remove(index + 3);
-        indices.swap_remove(index + 2);
-        indices.swap_remove(index + 1);
-        indices.swap_remove(index + 0);
-        let index = {
-            if index + 5 > indices.len() {
-                indices.len() - 6
-            } else {
-                index
-            }
-        };
-        indices[index + 5] -= offset;
-        indices[index + 4] -= offset;
-        indices[index + 3] -= offset;
-        indices[index + 2] -= offset;
-        indices[index + 1] -= offset;
-        indices[index + 0] -= offset;
-        let ver_count = mesh.count_vertices();
-        let offset = ver_count - quad;
-        vivi.change_quad_index(ver_count, quad);
+        for _ in 0..6 {
+            indices.pop();
+        }
     }
 }
 
