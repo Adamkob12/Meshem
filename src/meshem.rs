@@ -1,7 +1,8 @@
 //! This module contains the main functions themself, and some added utilities and defs.
-use super::dynamic_mesh::*;
+use super::mesh_metadata::*;
 use super::{Dimensions, Neighbors, VoxelRegistry};
-use crate::util::vav::*;
+use crate::update::add_quads_facing;
+use crate::util::*;
 use crate::{face_to_u32, Face, Face::*};
 use bevy::prelude::*;
 use bevy::render::mesh::{
@@ -39,7 +40,7 @@ pub fn mesh_grid<T>(
 ) -> Option<(Mesh, MeshMD<T>)> {
     let mut mesh = Mesh::new(PrimitiveTopology::TriangleList);
     let ch_len = grid.len();
-    let mut vivi = vec![vec![]; ch_len];
+    let mut vivi = VIVI::new(ch_len);
     assert_eq!(
         ch_len,
         dims.0 * dims.1 * dims.2,
@@ -58,7 +59,8 @@ pub fn mesh_grid<T>(
     }
     let mut vertices: Vec<(MeshVertexAttributeId, &mut VertexAttributeValues)> =
         mesh.attributes_mut().collect();
-
+    let center = reg.get_center();
+    let voxel_dims = reg.get_voxel_dimensions();
     for k in 0..height {
         for j in 0..length {
             for i in 0..width {
@@ -71,8 +73,6 @@ pub fn mesh_grid<T>(
                 let back = cord + width;
                 let forward = cord.checked_sub(width).unwrap_or(usize::MAX);
                 let mut neig = [false; 6];
-                let center = reg.get_center();
-                let voxel_dims = reg.get_voxel_dimensions();
                 let position_offset = (
                     i as f32 * voxel_dims[0],
                     k as f32 * voxel_dims[1],
@@ -138,8 +138,21 @@ pub fn mesh_grid<T>(
         }
     }
 
-    mesh.set_indices(Some(Indices::U32(indices)));
-    dbg!(&vivi);
+    // mesh.set_indices(Some(Indices::U32(indices)));
+    // add_quads_facing(
+    //     &mut mesh,
+    //     &mut vivi,
+    //     7,
+    //     vec![
+    //         (Face::Top, reg.get_mesh(&grid[4]).unwrap()),
+    //         (Face::Right, reg.get_mesh(&grid[1]).unwrap()),
+    //         (Face::Back, reg.get_mesh(&grid[2]).unwrap()),
+    //     ],
+    //     center,
+    //     voxel_dims,
+    //     dims,
+    // );
+
     let d_mesh = MeshMD {
         dims,
         vivi,
@@ -262,7 +275,7 @@ fn add_voxel(
                     final_vertices.push(i);
                     // update the vivi
                     if only_first {
-                        vivi[voxel_index].push((i + vertices_count as u32) | face_to_u32(face));
+                        vivi.insert(face, voxel_index, i, vertices_count as u32);
                         only_first = false;
                     }
                 }

@@ -1,13 +1,15 @@
-//! An example that showcases how to use the meshem function.
-#[allow(unused_imports)]
+//! An example that showcases how to update the mesh.
+#[allow(unused_imports, dead_code)]
 use bevy::pbr::wireframe::{Wireframe, WireframeConfig, WireframePlugin};
 use bevy::prelude::*;
 use bevy_meshem::default_block::*;
 use bevy_meshem::meshem::*;
+use bevy_meshem::update::*;
 use bevy_meshem::*;
+use rand::prelude::*;
 
 /// Constants for us to use.
-const FACTOR: usize = 10;
+const FACTOR: usize = 1;
 const SPEED: f32 = FACTOR as f32 * 2.0;
 const MESHING_ALGORITHM: MeshingAlgorithm = MeshingAlgorithm::Culling;
 
@@ -43,6 +45,7 @@ fn main() {
 struct Meshy {
     ma: MeshingAlgorithm,
     meta: MeshMD<u16>,
+    grid: Vec<u16>,
 }
 
 #[derive(Component)]
@@ -66,7 +69,7 @@ fn setup(
     let dims: Dimensions = (FACTOR, FACTOR, FACTOR);
 
     let (culled_mesh, metadata) =
-        mesh_grid(dims, grid, breg.into_inner(), MESHING_ALGORITHM).unwrap();
+        mesh_grid(dims, grid.clone(), breg.into_inner(), MESHING_ALGORITHM).unwrap();
     let culled_mesh_handle: Handle<Mesh> = meshes.add(culled_mesh.clone());
     commands.spawn((
         PbrBundle {
@@ -81,6 +84,7 @@ fn setup(
         Meshy {
             ma: MESHING_ALGORITHM,
             meta: metadata,
+            grid,
         },
     ));
 
@@ -139,8 +143,10 @@ fn setup(
     commands.spawn((
         MeshInfo,
         TextBundle::from_section(
-            format!("Press -C- To regenerate the mesh with a different Algorithm\nVertices Count: {}\nMeshing Algorithm: {:?}",culled_mesh.count_vertices(),
-                MESHING_ALGORITHM,),
+            format!(
+                "Press -C- To Break / Add a random voxel\nVertices Count: {}\n",
+                culled_mesh.count_vertices(),
+            ),
             TextStyle {
                 font_size: 26.0,
                 color: Color::LIME_GREEN,
@@ -303,25 +309,26 @@ fn regenerate_mesh(
     mut meshes: ResMut<Assets<Mesh>>,
     mesh_query: Query<&Handle<Mesh>>,
     mut event_reader: EventReader<RegenerateMesh>,
-    mut text_query: Query<&mut Text, With<MeshInfo>>,
 ) {
     for _ in event_reader.iter() {
         let mesh = meshes
             .get_mut(mesh_query.get_single().unwrap())
             .expect("Couldn't get a mut ref to the mesh");
-        let grid: Vec<u16> = vec![1; FACTOR * FACTOR * FACTOR];
-        let dims: Dimensions = (FACTOR, FACTOR, FACTOR);
 
         let m = meshy.get_single_mut().unwrap().into_inner();
-        let t = text_query.get_single_mut().unwrap().into_inner();
-        match m.ma {
-            MeshingAlgorithm::Culling => m.ma = MeshingAlgorithm::Naive,
-            MeshingAlgorithm::Naive => m.ma = MeshingAlgorithm::Culling,
+        let mut rng = rand::thread_rng();
+        let choise = m.grid.iter().enumerate().choose(&mut rng).unwrap();
+        match choise {
+            (i, 1) => {
+                m.meta.log(VoxelChange::Broken, i, 1, [Some(1); 6]);
+                update_mesh(mesh, &mut m.meta, breg.into_inner());
+            }
+            (i, 0) => {
+                m.meta.log(VoxelChange::Added, i, 0, [Some(1); 6]);
+                update_mesh(mesh, &mut m.meta, breg.into_inner());
+            }
+            _ => {}
         }
-
-        (*mesh, m.meta) = mesh_grid(dims, grid, breg.into_inner(), m.ma.clone()).unwrap();
-
-        t.sections[0].value = format!("Press -C- To regenerate the mesh with a different Algorithm\nVertices Count: {}\nMeshing Algorithm: {:?}",mesh.count_vertices(),m.ma);
-        return;
+        break;
     }
 }

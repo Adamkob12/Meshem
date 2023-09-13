@@ -1,13 +1,13 @@
 #![allow(dead_code, unused_imports, unused_variables)]
 pub mod default_block;
-pub mod dynamic_mesh;
+pub mod mesh_metadata;
 pub mod meshem;
 pub mod update;
 
 mod util;
 
 use crate::default_block::*;
-use crate::dynamic_mesh::*;
+pub use crate::mesh_metadata::*;
 use crate::meshem::*;
 use bevy::render::mesh::{
     Indices, Mesh, MeshVertexAttribute, MeshVertexAttributeId, VertexAttributeValues,
@@ -47,6 +47,8 @@ pub(crate) enum Face {
     Forward,
 }
 
+const OFFSET_CONST: u32 = 0b0001_1111_1111_1111_1111_1111_1111_1111;
+
 pub(crate) fn face_to_u32(f: Face) -> u32 {
     match f {
         // 101 -> 2^31 + 2^29
@@ -64,6 +66,19 @@ pub(crate) fn face_to_u32(f: Face) -> u32 {
     }
 }
 
+impl Face {
+    pub(crate) fn opposite(&self) -> Face {
+        match *self {
+            Face::Top => Face::Bottom,
+            Face::Bottom => Face::Top,
+            Face::Right => Face::Left,
+            Face::Left => Face::Right,
+            Face::Back => Face::Forward,
+            Face::Forward => Face::Back,
+        }
+    }
+}
+
 impl Into<usize> for Face {
     fn into(self) -> usize {
         match self {
@@ -73,6 +88,20 @@ impl Into<usize> for Face {
             Face::Left => 3,
             Face::Back => 4,
             Face::Forward => 5,
+        }
+    }
+}
+
+impl From<usize> for Face {
+    fn from(i: usize) -> Face {
+        match i {
+            0 => Face::Top,
+            1 => Face::Bottom,
+            2 => Face::Right,
+            3 => Face::Left,
+            4 => Face::Back,
+            5 => Face::Forward,
+            _ => panic!("Face can only be infered from 6 values, 0..5 (inclucive)"),
         }
     }
 }
