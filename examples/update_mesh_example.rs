@@ -1,13 +1,16 @@
-//! An example that showcases how to use the meshem function.
-#[allow(unused_imports)]
+//! An example that showcases how to update the mesh.
+#[allow(unused_imports, dead_code)]
 use bevy::pbr::wireframe::{Wireframe, WireframeConfig, WireframePlugin};
 use bevy::prelude::*;
 use bevy_meshem::default_block::*;
 use bevy_meshem::meshem::*;
+use bevy_meshem::update::*;
+use bevy_meshem::util::get_neighbor;
 use bevy_meshem::*;
+use rand::prelude::*;
 
 /// Constants for us to use.
-const FACTOR: usize = 10;
+const FACTOR: usize = 6;
 const SPEED: f32 = FACTOR as f32 * 2.0;
 const MESHING_ALGORITHM: MeshingAlgorithm = MeshingAlgorithm::Culling;
 
@@ -19,7 +22,7 @@ fn main() {
         block: default_block(),
     })
     .insert_resource(AmbientLight {
-        brightness: 1.5,
+        brightness: 0.3,
         color: Color::WHITE,
     });
 
@@ -29,7 +32,7 @@ fn main() {
             input_handler,
             toggle_wireframe,
             input_handler_rotation,
-            regenerate_mesh,
+            mesh_update,
         ),
     );
 
@@ -41,8 +44,8 @@ fn main() {
 
 #[derive(Component)]
 struct Meshy {
-    ma: MeshingAlgorithm,
     meta: MeshMD<u16>,
+    grid: Vec<u16>,
 }
 
 #[derive(Component)]
@@ -66,21 +69,21 @@ fn setup(
     let dims: Dimensions = (FACTOR, FACTOR, FACTOR);
 
     let (culled_mesh, metadata) =
-        mesh_grid(dims, grid, breg.into_inner(), MESHING_ALGORITHM).unwrap();
+        mesh_grid(dims, grid.clone(), breg.into_inner(), MESHING_ALGORITHM).unwrap();
     let culled_mesh_handle: Handle<Mesh> = meshes.add(culled_mesh.clone());
     commands.spawn((
         PbrBundle {
             mesh: culled_mesh_handle,
             material: materials.add(StandardMaterial {
-                base_color: Color::SALMON,
+                base_color: Color::LIME_GREEN,
                 alpha_mode: AlphaMode::Mask(0.5),
                 ..default()
             }),
             ..default()
         },
         Meshy {
-            ma: MESHING_ALGORITHM,
             meta: metadata,
+            grid,
         },
     ));
 
@@ -108,8 +111,8 @@ fn setup(
     // Light up the scene.
     commands.spawn(PointLightBundle {
         point_light: PointLight {
-            intensity: 5000.0,
-            range: 500.0,
+            intensity: 7000.0,
+            range: 1000.0,
             ..default()
         },
         transform: camera_and_light_transform,
@@ -139,8 +142,7 @@ fn setup(
     commands.spawn((
         MeshInfo,
         TextBundle::from_section(
-            format!("Press -C- To regenerate the mesh with a different Algorithm\nVertices Count: {}\nMeshing Algorithm: {:?}",culled_mesh.count_vertices(),
-                MESHING_ALGORITHM,),
+            format!("Press -C- To Break / Add a random voxel\n",),
             TextStyle {
                 font_size: 26.0,
                 color: Color::LIME_GREEN,
@@ -231,7 +233,7 @@ fn input_handler(
     if keyboard_input.just_pressed(KeyCode::T) {
         event_writer.send_default();
     }
-    if keyboard_input.just_pressed(KeyCode::C) {
+    if keyboard_input.pressed(KeyCode::C) {
         e.send_default();
     }
 }
@@ -296,32 +298,45 @@ fn input_handler_rotation(
     // }
 }
 
-/// System to regenerate the mesh, but using a different algorithm.
-fn regenerate_mesh(
+/// System to add or break random voxels.
+fn mesh_update(
     mut meshy: Query<&mut Meshy>,
     breg: Res<BlockRegistry>,
     mut meshes: ResMut<Assets<Mesh>>,
     mesh_query: Query<&Handle<Mesh>>,
     mut event_reader: EventReader<RegenerateMesh>,
-    mut text_query: Query<&mut Text, With<MeshInfo>>,
 ) {
     for _ in event_reader.iter() {
         let mesh = meshes
             .get_mut(mesh_query.get_single().unwrap())
             .expect("Couldn't get a mut ref to the mesh");
-        let grid: Vec<u16> = vec![1; FACTOR * FACTOR * FACTOR];
-        let dims: Dimensions = (FACTOR, FACTOR, FACTOR);
 
         let m = meshy.get_single_mut().unwrap().into_inner();
-        let t = text_query.get_single_mut().unwrap().into_inner();
-        match m.ma {
-            MeshingAlgorithm::Culling => m.ma = MeshingAlgorithm::Naive,
-            MeshingAlgorithm::Naive => m.ma = MeshingAlgorithm::Culling,
+        let mut rng = rand::thread_rng();
+        let choise = m.grid.iter().enumerate().choose(&mut rng).unwrap();
+        let neighbors: [Option<u16>; 6] = {
+            let mut r = [None; 6];
+            for i in 0..6 {
+                match get_neighbor(choise.0, Face::from(i), m.meta.dims) {
+                    None => {}
+                    Some(j) => r[i] = Some(m.grid[j]),
+                }
+            }
+            r
+        };
+        match choise {
+            (i, 1) => {
+                m.meta.log(VoxelChange::Broken, i, 1, neighbors);
+                update_mesh(mesh, &mut m.meta, breg.into_inner());
+                m.grid[i] = 0;
+            }
+            (i, 0) => {
+                m.meta.log(VoxelChange::Added, i, 1, neighbors);
+                update_mesh(mesh, &mut m.meta, breg.into_inner());
+                m.grid[i] = 1;
+            }
+            _ => {}
         }
-
-        (*mesh, m.meta) = mesh_grid(dims, grid, breg.into_inner(), m.ma.clone()).unwrap();
-
-        t.sections[0].value = format!("Press -C- To regenerate the mesh with a different Algorithm\nVertices Count: {}\nMeshing Algorithm: {:?}",mesh.count_vertices(),m.ma);
-        return;
+        break;
     }
 }

@@ -1,20 +1,22 @@
 //! Pretty hefty module, it defines a lot of needed methods on the VertexAttributeValues,
 //! that makes working with them more comfortable. It is very spaghetti but it helps with the
 //! readabillity of main API.
+use std::borrow::BorrowMut;
+
 use bevy::render::{
     mesh::{Indices, MeshVertexAttribute, MeshVertexAttributeId, VertexAttributeValues},
     render_resource::VertexFormat,
 };
-
-pub(crate) fn in_range(x: usize, bot: usize, top: usize) -> bool {
-    return bot <= x && x < top;
-}
-
 pub(crate) trait VAVutils {
     fn extend(&mut self, t: &Self);
     fn filter_bool_array(&self, index_filter: Vec<bool>) -> Self;
     fn new(format: VertexFormat) -> VertexAttributeValues;
     fn offset_all(&self, offset: (f32, f32, f32)) -> VertexAttributeValues;
+    // method recieves vector with the indexes of the needed values,
+    // and returns the needed values in the same order.
+    fn get_needed(&self, needed_values: &Vec<u32>) -> VertexAttributeValues;
+    fn swap_remove(&mut self, index: usize);
+    fn remove(&mut self, index: usize);
 }
 
 impl VAVutils for VertexAttributeValues {
@@ -30,6 +32,297 @@ impl VAVutils for VertexAttributeValues {
             _ => panic!("Method offset_all only works for Float32x3 (the standard for position)"),
         }
     }
+
+    fn swap_remove(&mut self, index: usize) {
+        match self {
+            VertexAttributeValues::Float32(ref mut vals) => {
+                if index < vals.len() {
+                    vals.swap_remove(index);
+                }
+            }
+            VertexAttributeValues::Sint32(ref mut vals) => {
+                if index < vals.len() {
+                    vals.swap_remove(index);
+                }
+            }
+            VertexAttributeValues::Uint32(ref mut vals) => {
+                if index < vals.len() {
+                    vals.swap_remove(index);
+                }
+            }
+            VertexAttributeValues::Float32x2(ref mut vals) => {
+                if index < vals.len() {
+                    vals.swap_remove(index);
+                }
+            }
+            VertexAttributeValues::Sint32x2(ref mut vals) => {
+                if index < vals.len() {
+                    vals.swap_remove(index);
+                }
+            }
+            VertexAttributeValues::Uint32x2(ref mut vals) => {
+                if index < vals.len() {
+                    vals.swap_remove(index);
+                }
+            }
+            VertexAttributeValues::Float32x3(ref mut vals) => {
+                if index < vals.len() {
+                    vals.swap_remove(index);
+                }
+            }
+            VertexAttributeValues::Sint32x3(ref mut vals) => {
+                if index < vals.len() {
+                    vals.swap_remove(index);
+                }
+            }
+            VertexAttributeValues::Uint32x3(ref mut vals) => {
+                if index < vals.len() {
+                    vals.swap_remove(index);
+                }
+            }
+            VertexAttributeValues::Float32x4(ref mut vals) => {
+                if index < vals.len() {
+                    vals.swap_remove(index);
+                }
+            }
+            VertexAttributeValues::Sint32x4(ref mut vals) => {
+                if index < vals.len() {
+                    vals.swap_remove(index);
+                }
+            }
+            VertexAttributeValues::Uint32x4(ref mut vals) => {
+                if index < vals.len() {
+                    vals.swap_remove(index);
+                }
+            }
+            VertexAttributeValues::Sint16x2(ref mut vals) => {
+                if index < vals.len() {
+                    vals.swap_remove(index);
+                }
+            }
+            VertexAttributeValues::Snorm16x2(ref mut vals) => {
+                if index < vals.len() {
+                    vals.swap_remove(index);
+                }
+            }
+            VertexAttributeValues::Uint16x2(ref mut vals) => {
+                if index < vals.len() {
+                    vals.swap_remove(index);
+                }
+            }
+            VertexAttributeValues::Unorm16x2(ref mut vals) => {
+                if index < vals.len() {
+                    vals.swap_remove(index);
+                }
+            }
+            VertexAttributeValues::Sint16x4(ref mut vals) => {
+                if index < vals.len() {
+                    vals.swap_remove(index);
+                }
+            }
+            VertexAttributeValues::Snorm16x4(ref mut vals) => {
+                if index < vals.len() {
+                    vals.swap_remove(index);
+                }
+            }
+            VertexAttributeValues::Uint16x4(ref mut vals) => {
+                if index < vals.len() {
+                    vals.swap_remove(index);
+                }
+            }
+            VertexAttributeValues::Unorm16x4(ref mut vals) => {
+                if index < vals.len() {
+                    vals.swap_remove(index);
+                }
+            }
+            VertexAttributeValues::Sint8x2(ref mut vals) => {
+                if index < vals.len() {
+                    vals.swap_remove(index);
+                }
+            }
+            VertexAttributeValues::Snorm8x2(ref mut vals) => {
+                if index < vals.len() {
+                    vals.swap_remove(index);
+                }
+            }
+            VertexAttributeValues::Uint8x2(ref mut vals) => {
+                if index < vals.len() {
+                    vals.swap_remove(index);
+                }
+            }
+            VertexAttributeValues::Unorm8x2(ref mut vals) => {
+                if index < vals.len() {
+                    vals.swap_remove(index);
+                }
+            }
+            VertexAttributeValues::Sint8x4(ref mut vals) => {
+                if index < vals.len() {
+                    vals.swap_remove(index);
+                }
+            }
+            VertexAttributeValues::Snorm8x4(ref mut vals) => {
+                if index < vals.len() {
+                    vals.swap_remove(index);
+                }
+            }
+            VertexAttributeValues::Uint8x4(ref mut vals) => {
+                if index < vals.len() {
+                    vals.swap_remove(index);
+                }
+            }
+            VertexAttributeValues::Unorm8x4(ref mut vals) => {
+                if index < vals.len() {
+                    vals.swap_remove(index);
+                }
+            }
+        }
+    }
+
+    fn remove(&mut self, index: usize) {
+        match self {
+            VertexAttributeValues::Float32(ref mut vals) => {
+                if index < vals.len() {
+                    vals.remove(index);
+                }
+            }
+            VertexAttributeValues::Sint32(ref mut vals) => {
+                if index < vals.len() {
+                    vals.remove(index);
+                }
+            }
+            VertexAttributeValues::Uint32(ref mut vals) => {
+                if index < vals.len() {
+                    vals.remove(index);
+                }
+            }
+            VertexAttributeValues::Float32x2(ref mut vals) => {
+                if index < vals.len() {
+                    vals.remove(index);
+                }
+            }
+            VertexAttributeValues::Sint32x2(ref mut vals) => {
+                if index < vals.len() {
+                    vals.remove(index);
+                }
+            }
+            VertexAttributeValues::Uint32x2(ref mut vals) => {
+                if index < vals.len() {
+                    vals.remove(index);
+                }
+            }
+            VertexAttributeValues::Float32x3(ref mut vals) => {
+                if index < vals.len() {
+                    vals.remove(index);
+                }
+            }
+            VertexAttributeValues::Sint32x3(ref mut vals) => {
+                if index < vals.len() {
+                    vals.remove(index);
+                }
+            }
+            VertexAttributeValues::Uint32x3(ref mut vals) => {
+                if index < vals.len() {
+                    vals.remove(index);
+                }
+            }
+            VertexAttributeValues::Float32x4(ref mut vals) => {
+                if index < vals.len() {
+                    vals.remove(index);
+                }
+            }
+            VertexAttributeValues::Sint32x4(ref mut vals) => {
+                if index < vals.len() {
+                    vals.remove(index);
+                }
+            }
+            VertexAttributeValues::Uint32x4(ref mut vals) => {
+                if index < vals.len() {
+                    vals.remove(index);
+                }
+            }
+            VertexAttributeValues::Sint16x2(ref mut vals) => {
+                if index < vals.len() {
+                    vals.remove(index);
+                }
+            }
+            VertexAttributeValues::Snorm16x2(ref mut vals) => {
+                if index < vals.len() {
+                    vals.remove(index);
+                }
+            }
+            VertexAttributeValues::Uint16x2(ref mut vals) => {
+                if index < vals.len() {
+                    vals.remove(index);
+                }
+            }
+            VertexAttributeValues::Unorm16x2(ref mut vals) => {
+                if index < vals.len() {
+                    vals.remove(index);
+                }
+            }
+            VertexAttributeValues::Sint16x4(ref mut vals) => {
+                if index < vals.len() {
+                    vals.remove(index);
+                }
+            }
+            VertexAttributeValues::Snorm16x4(ref mut vals) => {
+                if index < vals.len() {
+                    vals.remove(index);
+                }
+            }
+            VertexAttributeValues::Uint16x4(ref mut vals) => {
+                if index < vals.len() {
+                    vals.remove(index);
+                }
+            }
+            VertexAttributeValues::Unorm16x4(ref mut vals) => {
+                if index < vals.len() {
+                    vals.remove(index);
+                }
+            }
+            VertexAttributeValues::Sint8x2(ref mut vals) => {
+                if index < vals.len() {
+                    vals.remove(index);
+                }
+            }
+            VertexAttributeValues::Snorm8x2(ref mut vals) => {
+                if index < vals.len() {
+                    vals.remove(index);
+                }
+            }
+            VertexAttributeValues::Uint8x2(ref mut vals) => {
+                if index < vals.len() {
+                    vals.remove(index);
+                }
+            }
+            VertexAttributeValues::Unorm8x2(ref mut vals) => {
+                if index < vals.len() {
+                    vals.remove(index);
+                }
+            }
+            VertexAttributeValues::Sint8x4(ref mut vals) => {
+                if index < vals.len() {
+                    vals.remove(index);
+                }
+            }
+            VertexAttributeValues::Snorm8x4(ref mut vals) => {
+                if index < vals.len() {
+                    vals.remove(index);
+                }
+            }
+            VertexAttributeValues::Uint8x4(ref mut vals) => {
+                if index < vals.len() {
+                    vals.remove(index);
+                }
+            }
+            VertexAttributeValues::Unorm8x4(ref mut vals) => {
+                if index < vals.len() {
+                    vals.remove(index);
+                }
+            }
+        }
+    }
+
     fn extend(&mut self, t: &VertexAttributeValues) {
         match (self, t) {
             (
@@ -145,6 +438,64 @@ impl VAVutils for VertexAttributeValues {
                 VertexAttributeValues::Unorm8x4(values),
             ) => vals.extend(values),
             _ => panic!("VertexAttributeValues must have the same variant"),
+        }
+    }
+
+    // method recieves vector with the indexes of the needed values,
+    // and returns the needed values in the same order.
+    fn get_needed(&self, needed_values: &Vec<u32>) -> VertexAttributeValues {
+        match self {
+            VertexAttributeValues::Float32(ref vals) => {
+                let mut to_return = VertexAttributeValues::Float32(vec![]);
+                let VertexAttributeValues::Float32(ref mut values) = to_return else {
+                    panic!("This shoudln't happen.");
+                };
+                for &i in needed_values.iter() {
+                    values.push(vals[i as usize]);
+                }
+                return to_return;
+            }
+            VertexAttributeValues::Sint32(ref vals) => {
+                let mut to_return = VertexAttributeValues::Sint32(vec![]);
+                let VertexAttributeValues::Sint32(ref mut values) = to_return else {
+                    panic!("This shoudln't happen.");
+                };
+                for &i in needed_values.iter() {
+                    values.push(vals[i as usize]);
+                }
+                return to_return;
+            }
+            VertexAttributeValues::Uint32(ref vals) => {
+                let mut to_return = VertexAttributeValues::Uint32(vec![]);
+                let VertexAttributeValues::Uint32(ref mut values) = to_return else {
+                    panic!("This shoudln't happen.");
+                };
+                for &i in needed_values.iter() {
+                    values.push(vals[i as usize]);
+                }
+                return to_return;
+            }
+            VertexAttributeValues::Float32x2(ref vals) => {
+                let mut to_return = VertexAttributeValues::Float32x2(vec![]);
+                let VertexAttributeValues::Float32x2(ref mut values) = to_return else {
+                    panic!("This shoudln't happen.");
+                };
+                for &i in needed_values.iter() {
+                    values.push(vals[i as usize]);
+                }
+                return to_return;
+            }
+            VertexAttributeValues::Float32x3(ref vals) => {
+                let mut to_return = VertexAttributeValues::Float32x3(vec![]);
+                let VertexAttributeValues::Float32x3(ref mut values) = to_return else {
+                    panic!("This shoudln't happen.");
+                };
+                for &i in needed_values.iter() {
+                    values.push(vals[i as usize]);
+                }
+                return to_return;
+            }
+            _ => panic!("This variant isn't supported"),
         }
     }
 
