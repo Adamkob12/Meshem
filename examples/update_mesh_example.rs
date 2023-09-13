@@ -9,7 +9,7 @@ use bevy_meshem::*;
 use rand::prelude::*;
 
 /// Constants for us to use.
-const FACTOR: usize = 1;
+const FACTOR: usize = 3;
 const SPEED: f32 = FACTOR as f32 * 2.0;
 const MESHING_ALGORITHM: MeshingAlgorithm = MeshingAlgorithm::Culling;
 
@@ -43,7 +43,6 @@ fn main() {
 
 #[derive(Component)]
 struct Meshy {
-    ma: MeshingAlgorithm,
     meta: MeshMD<u16>,
     grid: Vec<u16>,
 }
@@ -82,7 +81,6 @@ fn setup(
             ..default()
         },
         Meshy {
-            ma: MESHING_ALGORITHM,
             meta: metadata,
             grid,
         },

@@ -1,7 +1,7 @@
 //! This module contains the main functions themself, and some added utilities and defs.
 use super::mesh_metadata::*;
 use super::{Dimensions, Neighbors, VoxelRegistry};
-use crate::update::add_quads_facing;
+use crate::util::vav::*;
 use crate::util::*;
 use crate::{face_to_u32, Face, Face::*};
 use bevy::prelude::*;
@@ -54,18 +54,15 @@ pub fn mesh_grid<T>(
     let t = width * length * height;
 
     let mut indices: Vec<u32> = vec![];
+    let mut vertices: Vec<(MeshVertexAttribute, VertexAttributeValues)> = vec![];
     for att in reg.all_attributes().iter() {
-        mesh.insert_attribute(att.clone(), VertexAttributeValues::new(att.format));
+        vertices.push((att.clone(), VertexAttributeValues::new(att.format.clone())));
     }
-    let mut vertices: Vec<(MeshVertexAttributeId, &mut VertexAttributeValues)> =
-        mesh.attributes_mut().collect();
-    let center = reg.get_center();
-    let voxel_dims = reg.get_voxel_dimensions();
+
     for k in 0..height {
         for j in 0..length {
             for i in 0..width {
                 let cord = k * length * width + j * width + i;
-                // print!("{} , ", cord);
                 let above = cord + length * width;
                 let below = cord.checked_sub(width * length).unwrap_or(usize::MAX);
                 let right = cord + 1;
@@ -73,6 +70,8 @@ pub fn mesh_grid<T>(
                 let back = cord + width;
                 let forward = cord.checked_sub(width).unwrap_or(usize::MAX);
                 let mut neig = [false; 6];
+                let center = reg.get_center();
+                let voxel_dims = reg.get_voxel_dimensions();
                 let position_offset = (
                     i as f32 * voxel_dims[0],
                     k as f32 * voxel_dims[1],
@@ -122,7 +121,7 @@ pub fn mesh_grid<T>(
                     if let Some(v_mesh) = reg.get_mesh(&grid[cord]) {
                         // add_vertices() is a private function that adds the vertices and
                         // indices to the running count of vertices and indices.
-                        add_voxel(
+                        add_vertices(
                             neig,
                             &mut indices,
                             &mut vertices,
@@ -138,21 +137,10 @@ pub fn mesh_grid<T>(
         }
     }
 
-    // mesh.set_indices(Some(Indices::U32(indices)));
-    // add_quads_facing(
-    //     &mut mesh,
-    //     &mut vivi,
-    //     7,
-    //     vec![
-    //         (Face::Top, reg.get_mesh(&grid[4]).unwrap()),
-    //         (Face::Right, reg.get_mesh(&grid[1]).unwrap()),
-    //         (Face::Back, reg.get_mesh(&grid[2]).unwrap()),
-    //     ],
-    //     center,
-    //     voxel_dims,
-    //     dims,
-    // );
-
+    for (att, vals) in vertices {
+        mesh.insert_attribute(att, vals);
+    }
+    mesh.set_indices(Some(Indices::U32(indices)));
     let d_mesh = MeshMD {
         dims,
         vivi,
@@ -166,10 +154,10 @@ pub fn mesh_grid<T>(
 /// and indices, preserving their attributes, and (important!) assigning a custom offset to the
 /// position attributes, we are assuming this is only needed for the position attributes (because
 /// it usually is).
-fn add_voxel(
+fn add_vertices(
     neig: Neighbors,
     indices_main: &mut Vec<u32>,
-    vertices: &mut Vec<(MeshVertexAttributeId, &mut VertexAttributeValues)>,
+    vertices: &mut Vec<(MeshVertexAttribute, VertexAttributeValues)>,
     voxel: &Mesh,
     vivi: &mut VIVI,
     voxel_index: usize,
@@ -275,7 +263,7 @@ fn add_voxel(
                     final_vertices.push(i);
                     // update the vivi
                     if only_first {
-                        vivi.insert(face, voxel_index, i, vertices_count as u32);
+                        vivi.insert(face, voxel_index, i + vertices_count as u32);
                         only_first = false;
                     }
                 }
@@ -291,10 +279,10 @@ fn add_voxel(
 
     for (id, vals) in vertices.iter_mut() {
         let mut att = voxel
-            .attribute(*id)
+            .attribute(id.id)
             .expect(format!("Couldn't retrieve voxel mesh attribute {:?}.", id).as_str())
             .get_needed(&final_vertices);
-        if *id == Mesh::ATTRIBUTE_POSITION.id {
+        if id.id == Mesh::ATTRIBUTE_POSITION.id {
             att = att.offset_all(position_offset);
         }
         vals.extend(&att);

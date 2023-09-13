@@ -22,18 +22,10 @@ impl VIVI {
         }
     }
 
-    pub(crate) fn insert(
-        &mut self,
-        face: Face,
-        voxel_index: usize,
-        vertex: u32,
-        vertices_count: u32,
-    ) {
-        self.vivi[voxel_index].push((vertex + vertices_count) | face_to_u32(face));
-        self.map.insert(
-            vertex + vertices_count,
-            voxel_index as u32 | face_to_u32(face),
-        );
+    pub(crate) fn insert(&mut self, face: Face, voxel_index: usize, vertex: u32) {
+        self.vivi[voxel_index].push((vertex) | face_to_u32(face));
+        self.map
+            .insert(vertex, voxel_index as u32 | face_to_u32(face));
     }
 
     pub(crate) fn get_quad_index(&self, face: Face, voxel_index: usize) -> Option<u32> {
@@ -47,16 +39,25 @@ impl VIVI {
     }
 
     pub(crate) fn change_quad_index(&mut self, old_vertex: usize, new_vertex: usize) {
+        println!("~~~~~~~~");
+        println!("{}", old_vertex);
+        println!("{}", new_vertex);
+        println!("~~~~~~~~");
+        self.map
+            .iter()
+            .for_each(|(&x, &y)| println!("{}, {}", x, y & OFFSET_CONST));
+        println!("~~~~~~~~");
         let voxel = self
             .map
             .remove(&(old_vertex as u32))
             .expect("Couldn't find voxel matching vertex");
-        let q = voxel | !OFFSET_CONST;
-        let voxel = voxel | OFFSET_CONST;
+        let q = voxel & !OFFSET_CONST;
+        let v = voxel & OFFSET_CONST;
         let old_vertex = old_vertex as u32 | q;
-        for v in self.vivi[voxel as usize].iter_mut() {
+        for v in self.vivi[v as usize].iter_mut() {
             if *v == old_vertex {
                 *v = new_vertex as u32 | q;
+                self.map.insert(new_vertex as u32, voxel);
                 return;
             }
         }
