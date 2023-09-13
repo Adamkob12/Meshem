@@ -10,7 +10,7 @@ use bevy_meshem::*;
 use rand::prelude::*;
 
 /// Constants for us to use.
-const FACTOR: usize = 5;
+const FACTOR: usize = 6;
 const SPEED: f32 = FACTOR as f32 * 2.0;
 const MESHING_ALGORITHM: MeshingAlgorithm = MeshingAlgorithm::Culling;
 
@@ -65,8 +65,8 @@ fn setup(
     // wireframe_config: ResMut<WireframeConfig>,
     mut meshes: ResMut<Assets<Mesh>>,
 ) {
-    let grid: Vec<u16> = vec![0; 2 * FACTOR * FACTOR];
-    let dims: Dimensions = (FACTOR, 2, FACTOR);
+    let grid: Vec<u16> = vec![1; FACTOR * FACTOR * FACTOR];
+    let dims: Dimensions = (FACTOR, FACTOR, FACTOR);
 
     let (culled_mesh, metadata) =
         mesh_grid(dims, grid.clone(), breg.into_inner(), MESHING_ALGORITHM).unwrap();
@@ -142,10 +142,7 @@ fn setup(
     commands.spawn((
         MeshInfo,
         TextBundle::from_section(
-            format!(
-                "Press -C- To Break / Add a random voxel\nVertices Count: {}\n",
-                culled_mesh.count_vertices(),
-            ),
+            format!("Press -C- To Break / Add a random voxel\n",),
             TextStyle {
                 font_size: 26.0,
                 color: Color::LIME_GREEN,

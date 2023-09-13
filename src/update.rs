@@ -56,7 +56,6 @@ pub fn update_mesh<T>(
 
         match *change {
             VoxelChange::Added => {
-                println!("Adding {}", index);
                 add_voxel_after_gen(
                     neig,
                     mesh,
@@ -66,15 +65,10 @@ pub fn update_mesh<T>(
                     reg.get_center(),
                     position_offset,
                 );
-                println!("add_voxel_after_gen -- success");
                 remove_quads_facing(mesh, &mut metadata.vivi, *index, metadata.dims);
-                println!("remove_quads_facing -- success");
-                println!("added");
             }
             VoxelChange::Broken => {
-                println!("breaking{}", index);
                 remove_voxel(mesh, &mut metadata.vivi, *index, metadata.dims, [true; 6]);
-                println!("remove_voxel -- success");
                 add_quads_facing(
                     mesh,
                     &mut metadata.vivi,
@@ -84,8 +78,6 @@ pub fn update_mesh<T>(
                     reg.get_voxel_dimensions(),
                     metadata.dims,
                 );
-                println!("add_quads_facing -- success");
-                println!("break");
             }
         }
     }
@@ -128,10 +120,6 @@ fn remove_voxel(
             None => continue,
             Some(i) => i,
         } as usize;
-        println!(
-            "removing {} at voxel index {}, face {}",
-            quad, voxel_index, face as usize
-        );
         if quad + 25 >= mesh.count_vertices() {
             for (id, vals) in mesh.attributes_mut() {
                 vals.remove(quad + 3);
