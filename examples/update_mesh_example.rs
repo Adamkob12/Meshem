@@ -5,6 +5,7 @@ use bevy::prelude::*;
 use bevy_meshem::default_block::*;
 use bevy_meshem::meshem::*;
 use bevy_meshem::update::*;
+use bevy_meshem::util::get_neighbor;
 use bevy_meshem::*;
 use rand::prelude::*;
 
@@ -64,7 +65,7 @@ fn setup(
     // wireframe_config: ResMut<WireframeConfig>,
     mut meshes: ResMut<Assets<Mesh>>,
 ) {
-    let grid: Vec<u16> = vec![1; FACTOR * FACTOR * FACTOR];
+    let grid: Vec<u16> = vec![0; FACTOR * FACTOR * FACTOR];
     let dims: Dimensions = (FACTOR, FACTOR, FACTOR);
 
     let (culled_mesh, metadata) =
@@ -316,14 +317,26 @@ fn regenerate_mesh(
         let m = meshy.get_single_mut().unwrap().into_inner();
         let mut rng = rand::thread_rng();
         let choise = m.grid.iter().enumerate().choose(&mut rng).unwrap();
+        let neighbors: [Option<u16>; 6] = {
+            let mut r = [None; 6];
+            for i in 0..6 {
+                match get_neighbor(choise.0, Face::from(i), m.meta.dims) {
+                    None => {}
+                    Some(j) => r[i] = Some(m.grid[j]),
+                }
+            }
+            r
+        };
         match choise {
             (i, 1) => {
-                m.meta.log(VoxelChange::Broken, i, 1, [Some(1); 6]);
+                m.meta.log(VoxelChange::Broken, i, 1, neighbors);
                 update_mesh(mesh, &mut m.meta, breg.into_inner());
+                m.grid[i] = 0;
             }
             (i, 0) => {
-                m.meta.log(VoxelChange::Added, i, 0, [Some(1); 6]);
+                m.meta.log(VoxelChange::Added, i, 1, neighbors);
                 update_mesh(mesh, &mut m.meta, breg.into_inner());
+                m.grid[i] = 1;
             }
             _ => {}
         }

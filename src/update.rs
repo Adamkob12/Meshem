@@ -1,3 +1,5 @@
+use std::cmp::max_by;
+
 use super::{Dimensions, Neighbors, VoxelRegistry};
 use crate::mesh_metadata::*;
 use crate::meshem::*;
@@ -24,14 +26,15 @@ pub fn update_mesh<T>(
         let temp = three_d_cords(*index, metadata.dims);
         let position_offset = (
             temp.0 as f32 * voxel_dims[0],
-            temp.1 as f32 * voxel_dims[1],
-            temp.2 as f32 * voxel_dims[2],
+            temp.2 as f32 * voxel_dims[1],
+            temp.1 as f32 * voxel_dims[2],
         );
         let neig: Neighbors = {
             let mut n = [false; 6];
             for (i, j) in neighbors.iter().enumerate() {
-                match *j {
+                match j {
                     None => n[i] = true,
+                    Some(t) if !reg.is_voxel(&t) => n[i] = true,
                     Some(_) => {}
                 }
             }
@@ -42,7 +45,10 @@ pub fn update_mesh<T>(
             for (i, j) in neighbors.iter().enumerate() {
                 match j {
                     None => continue,
-                    Some(t) => r.push((Face::from(i), reg.get_mesh(&t).unwrap())),
+                    Some(t) if reg.is_voxel(&t) => {
+                        r.push((Face::from(i), reg.get_mesh(&t).unwrap()))
+                    }
+                    _ => continue,
                 }
             }
             r
@@ -99,7 +105,7 @@ fn remove_quads_facing(mesh: &mut Mesh, vivi: &mut VIVI, voxel_index: usize, dim
         };
         neig = [false; 6];
         neig[face.opposite() as usize] = true;
-        remove_voxel(mesh, vivi, voxel_index, dims, neig);
+        remove_voxel(mesh, vivi, n, dims, neig);
     }
 }
 
@@ -122,6 +128,10 @@ fn remove_voxel(
             None => continue,
             Some(i) => i,
         } as usize;
+        println!(
+            "removing {} at voxel index {}, face {}",
+            quad, voxel_index, face as usize
+        );
         for (id, vals) in mesh.attributes_mut() {
             vals.swap_remove(quad + 3);
             vals.swap_remove(quad + 2);
@@ -129,10 +139,15 @@ fn remove_voxel(
             vals.swap_remove(quad + 0);
         }
         let index = (quad / 4) * 6;
+        let vc = mesh.count_vertices();
         let Indices::U32(indices) = mesh.indices_mut()
             .expect("couldn't get indices data") else {
             panic!("Expected U32 indices format");
         };
+        println!("~~~~~");
+        indices.iter().for_each(|&x| print!("{x}, "));
+        println!("~~~~~");
+        println!("{} \n {}", indices.len(), vc);
         let offset = *indices.last().unwrap() - indices[index + 5];
         indices.swap_remove(index + 5);
         indices.swap_remove(index + 4);
@@ -140,6 +155,13 @@ fn remove_voxel(
         indices.swap_remove(index + 2);
         indices.swap_remove(index + 1);
         indices.swap_remove(index + 0);
+        let index = {
+            if index + 5 > indices.len() {
+                indices.len() - 6
+            } else {
+                index
+            }
+        };
         indices[index + 5] -= offset;
         indices[index + 4] -= offset;
         indices[index + 3] -= offset;
@@ -164,20 +186,20 @@ pub(crate) fn add_quads_facing(
 ) {
     // Completed, Untested.
     // TODO:
-    let temp = three_d_cords(voxel_index, dims);
-    let position_offset = (
-        temp.0 as f32 * voxel_dims[0],
-        temp.1 as f32 * voxel_dims[1],
-        temp.2 as f32 * voxel_dims[2],
-    );
     let mut neig: Neighbors;
     for &(face, vmesh) in neighboring_voxels.iter() {
         neig = [false; 6];
-        neig[face as usize] = true;
+        neig[face.opposite() as usize] = true;
         let i = match get_neighbor(voxel_index, face, dims) {
             None => continue,
             Some(j) => j,
         };
+        let temp = three_d_cords(i, dims);
+        let position_offset = (
+            temp.0 as f32 * voxel_dims[0],
+            temp.2 as f32 * voxel_dims[1],
+            temp.1 as f32 * voxel_dims[2],
+        );
         add_voxel_after_gen(neig, mesh, vmesh, vivi, i, center, position_offset)
     }
 }
@@ -297,7 +319,7 @@ fn add_voxel_after_gen(
                     final_vertices.push(i);
                     // update the vivi
                     if only_first {
-                        vivi.insert(face, voxel_index, i + vertices_count as u32);
+                        vivi.insert(face, voxel_index, i + vertices_count as u32 - offset);
                         only_first = false;
                     }
                 }

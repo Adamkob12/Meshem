@@ -263,7 +263,7 @@ fn add_vertices(
                     final_vertices.push(i);
                     // update the vivi
                     if only_first {
-                        vivi.insert(face, voxel_index, i + vertices_count as u32);
+                        vivi.insert(face, voxel_index, i + vertices_count as u32 - offset);
                         only_first = false;
                     }
                 }

@@ -3,8 +3,7 @@ pub mod default_block;
 pub mod mesh_metadata;
 pub mod meshem;
 pub mod update;
-
-mod util;
+pub mod util;
 
 use crate::default_block::*;
 pub use crate::mesh_metadata::*;
@@ -38,7 +37,7 @@ pub type Dimensions = (usize, usize, usize);
 pub(crate) type Neighbors = [bool; 6];
 
 #[derive(Copy, Clone)]
-pub(crate) enum Face {
+pub enum Face {
     Top,
     Bottom,
     Right,

@@ -39,14 +39,6 @@ impl VIVI {
     }
 
     pub(crate) fn change_quad_index(&mut self, old_vertex: usize, new_vertex: usize) {
-        println!("~~~~~~~~");
-        println!("{}", old_vertex);
-        println!("{}", new_vertex);
-        println!("~~~~~~~~");
-        self.map
-            .iter()
-            .for_each(|(&x, &y)| println!("{}, {}", x, y & OFFSET_CONST));
-        println!("~~~~~~~~");
         let voxel = self
             .map
             .remove(&(old_vertex as u32))
