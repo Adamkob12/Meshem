@@ -2,9 +2,7 @@
 #[allow(unused_imports)]
 use bevy::pbr::wireframe::{Wireframe, WireframeConfig, WireframePlugin};
 use bevy::prelude::*;
-use bevy_meshem::default_block::*;
-use bevy_meshem::meshem::*;
-use bevy_meshem::*;
+use bevy_meshem::prelude::*;
 
 /// Constants for us to use.
 const FACTOR: usize = 10;

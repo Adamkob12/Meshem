@@ -1,14 +1,10 @@
 //! This module contains the main functions themself, and some added utilities and defs.
-use super::mesh_metadata::*;
-use super::{Dimensions, Neighbors, VoxelRegistry};
-use crate::util::vav::*;
+use crate::prelude::*;
 use crate::util::*;
-use crate::{face_to_u32, Face, Face::*};
 use bevy::prelude::*;
-use bevy::render::mesh::{
-    Indices, MeshVertexAttribute, MeshVertexAttributeId, VertexAttributeValues,
-};
+use bevy::render::mesh::{Indices, MeshVertexAttribute, VertexAttributeValues};
 use bevy::render::render_resource::PrimitiveTopology;
+use Face::*;
 
 /// All the variants for the Meshing algorithm.
 #[derive(Debug, Clone)]
@@ -75,7 +71,7 @@ pub fn mesh_grid<T>(
                 let position_offset = (
                     i as f32 * voxel_dims[0],
                     k as f32 * voxel_dims[1],
-                    j as f32 * voxel_dims[0],
+                    j as f32 * voxel_dims[2],
                 );
 
                 if in_range(k + 1, 0, height) {

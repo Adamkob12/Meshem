@@ -1,15 +1,15 @@
 //! A module containing the "default block", it is used in the examples,
 //! it is simple and easy to work with.
 use bevy::prelude::*;
-use bevy::render::mesh::{
-    Indices, MeshVertexAttribute, MeshVertexAttributeId, VertexAttributeValues,
-};
+use bevy::render::mesh::Indices;
 use bevy::render::render_resource::PrimitiveTopology;
-use bevy::utils::hashbrown::HashMap;
 
-/// Function that generates the block.
-pub fn default_block() -> Mesh {
+/// Function that generates the mesh of a voxel.
+pub fn generate_voxel_mesh(voxel_dims: [f32; 3]) -> Mesh {
     let mut cube_mesh = Mesh::new(PrimitiveTopology::TriangleList);
+    let y = voxel_dims[1] / 2.0;
+    let x = voxel_dims[0] / 2.0;
+    let z = voxel_dims[2] / 2.0;
 
     #[rustfmt::skip]
     cube_mesh.insert_attribute(
@@ -19,42 +19,38 @@ pub fn default_block() -> Mesh {
         // By centering our mesh around the origin, rotating the mesh preserves its center of mass.
         vec![
             // top (facing towards +y)
-            [-0.5, 0.5, 0.5],
-            [0.5, 0.5, 0.5],
-            [0.5, 0.5, -0.5],
-            [-0.5, 0.5, -0.5],
+            [-x,y, z],
+            [x,y, z],
+            [x,y, -z],
+            [-x,y, -z],
             // bottom   (-y)
-            [-0.5, -0.5, -0.5],
-            [0.5, -0.5, -0.5],
-            [0.5, -0.5, 0.5],
-            [-0.5, -0.5, 0.5],
+            [-x,-y, -z],
+            [x,-y, -z],
+            [x,-y, z],
+            [-x,-y, z],
             // right    (+x)
-            [0.5, 0.5, -0.5],
-            [0.5, 0.5, 0.5],
-            [0.5, -0.5, 0.5],
-            [0.5, -0.5, -0.5],
+            [x,y, -z],
+            [x,y, z],
+            [x,-y, z],
+            [x,-y, -z],
             // left     (-x)
-            [-0.5, -0.5, -0.5],
-            [-0.5, -0.5, 0.5],
-            [-0.5, 0.5, 0.5],
-            [-0.5, 0.5, -0.5],
+            [-x,-y, -z],
+            [-x,-y, z],
+            [-x,y, z],
+            [-x,y, -z],
             // back     (+z)
-            [0.5, 0.5, 0.5],
-            [-0.5, 0.5, 0.5],
-            [-0.5, -0.5, 0.5],
-            [0.5, -0.5, 0.5],
+            [x,y, z],
+            [-x,y, z],
+            [-x,-y, z],
+            [x,-y, z],
             // forward  (-z)
-            [0.5, -0.5, -0.5],
-            [-0.5, -0.5, -0.5],
-            [-0.5, 0.5, -0.5],
-            [0.5, 0.5, -0.5],
+            [x,-y, -z],
+            [-x,-y, -z],
+            [-x,y, -z],
+            [x,y, -z],
         ],
     );
 
-    // Set-up UV coordinated to point to the upper (V < 0.5), "dirt+grass" part of the texture.
-    // Take a look at the custom image (assets/textures/array_texture.png)
-    // so the UV coords will make more sense
-    // Note: (0.0, 0.0) = Top-Left in UV mapping, (1.0, 1.0) = Bottom-Right in UV mapping
     #[rustfmt::skip]
     cube_mesh.insert_attribute(
         Mesh::ATTRIBUTE_UV_0,

@@ -2,29 +2,23 @@
 #[allow(unused_imports, dead_code)]
 use bevy::pbr::wireframe::{Wireframe, WireframeConfig, WireframePlugin};
 use bevy::prelude::*;
-use bevy_meshem::default_block::*;
-use bevy_meshem::meshem::*;
-use bevy_meshem::update::*;
-use bevy_meshem::util::get_neighbor;
-use bevy_meshem::*;
+use bevy_meshem::prelude::*;
 use rand::prelude::*;
 
 /// Constants for us to use.
-const FACTOR: usize = 6;
+const FACTOR: usize = 8;
 const SPEED: f32 = FACTOR as f32 * 2.0;
-const MESHING_ALGORITHM: MeshingAlgorithm = MeshingAlgorithm::Culling;
 
 fn main() {
     let mut app = App::new();
     app.add_plugins(DefaultPlugins).add_plugins(WireframePlugin);
 
-    app.insert_resource(BlockRegistry {
-        block: default_block(),
-    })
-    .insert_resource(AmbientLight {
-        brightness: 0.3,
-        color: Color::WHITE,
-    });
+    let mesh = generate_voxel_mesh([1.0, 5.0, 1.0]);
+    app.insert_resource(BlockRegistry { block: mesh })
+        .insert_resource(AmbientLight {
+            brightness: 0.3,
+            color: Color::WHITE,
+        });
 
     app.add_systems(Startup, setup).add_systems(
         Update,
@@ -68,8 +62,13 @@ fn setup(
     let grid: Vec<u16> = vec![1; FACTOR * FACTOR * FACTOR];
     let dims: Dimensions = (FACTOR, FACTOR, FACTOR);
 
-    let (culled_mesh, metadata) =
-        mesh_grid(dims, grid.clone(), breg.into_inner(), MESHING_ALGORITHM).unwrap();
+    let (culled_mesh, metadata) = mesh_grid(
+        dims,
+        grid.clone(),
+        breg.into_inner(),
+        MeshingAlgorithm::Culling,
+    )
+    .unwrap();
     let culled_mesh_handle: Handle<Mesh> = meshes.add(culled_mesh.clone());
     commands.spawn((
         PbrBundle {
@@ -188,7 +187,7 @@ impl VoxelRegistry for BlockRegistry {
     }
     /// The dimensions of the Mesh, out mesh is defined in src/default_block.rs, just a constant.
     fn get_voxel_dimensions(&self) -> [f32; 3] {
-        return [1.0, 1.0, 1.0];
+        return [1.0, 5.0, 1.0];
     }
     /// The attributes we want to take from out voxels, note that using a lot of different
     /// attributes will likely lead to performance problems and unpredictible behaviour.

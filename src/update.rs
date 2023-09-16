@@ -1,16 +1,7 @@
-use std::cmp::max_by;
-
-use super::{Dimensions, Neighbors, VoxelRegistry};
-use crate::mesh_metadata::*;
-use crate::meshem::*;
-use crate::util::vav::*;
+use crate::prelude::*;
 use crate::util::*;
-use crate::*;
-use crate::{face_to_u32, Face, Face::*};
-use bevy::render::mesh::{
-    Indices, MeshVertexAttribute, MeshVertexAttributeId, VertexAttributeValues,
-};
-use bevy::render::render_resource::PrimitiveTopology;
+use bevy::render::mesh::{Indices, VertexAttributeValues};
+use Face::*;
 
 /// The function updates the mesh according to the change log in the mesh meta data.
 pub fn update_mesh<T>(
@@ -18,9 +9,6 @@ pub fn update_mesh<T>(
     metadata: &mut MeshMD<T>,
     reg: &impl VoxelRegistry<Voxel = T>,
 ) {
-    // In progress
-    // TODO:
-    let center = reg.get_center();
     let voxel_dims = reg.get_voxel_dimensions();
     for (voxel, index, change, neighbors) in metadata.changed_voxels.iter() {
         let temp = three_d_cords(*index, metadata.dims);
@@ -68,7 +56,7 @@ pub fn update_mesh<T>(
                 remove_quads_facing(mesh, &mut metadata.vivi, *index, metadata.dims);
             }
             VoxelChange::Broken => {
-                remove_voxel(mesh, &mut metadata.vivi, *index, metadata.dims, [true; 6]);
+                remove_voxel(mesh, &mut metadata.vivi, *index, [true; 6]);
                 add_quads_facing(
                     mesh,
                     &mut metadata.vivi,
@@ -86,8 +74,6 @@ pub fn update_mesh<T>(
 
 // The function removes all quads facing a voxel.
 fn remove_quads_facing(mesh: &mut Mesh, vivi: &mut VIVI, voxel_index: usize, dims: Dimensions) {
-    // Completed, Not tested
-    let ddd = three_d_cords(voxel_index, dims);
     let mut neig: Neighbors;
     for i in 0..6 {
         let face = Face::from(i as usize);
@@ -97,20 +83,12 @@ fn remove_quads_facing(mesh: &mut Mesh, vivi: &mut VIVI, voxel_index: usize, dim
         };
         neig = [false; 6];
         neig[face.opposite() as usize] = true;
-        remove_voxel(mesh, vivi, n, dims, neig);
+        remove_voxel(mesh, vivi, n, neig);
     }
 }
 
-// function removes voxel from the big mesh.
-fn remove_voxel(
-    mesh: &mut Mesh,
-    vivi: &mut VIVI,
-    voxel_index: usize,
-    dims: Dimensions,
-    neig: Neighbors,
-) {
-    // Untested
-    // TODO:
+/// Function removes voxel from the big mesh.
+fn remove_voxel(mesh: &mut Mesh, vivi: &mut VIVI, voxel_index: usize, neig: Neighbors) {
     for (i, b) in neig.iter().enumerate() {
         if !b {
             continue;
@@ -121,7 +99,7 @@ fn remove_voxel(
             Some(i) => i,
         } as usize;
         if quad + 25 >= mesh.count_vertices() {
-            for (id, vals) in mesh.attributes_mut() {
+            for (_, vals) in mesh.attributes_mut() {
                 vals.remove(quad + 3);
                 vals.remove(quad + 2);
                 vals.remove(quad + 1);
@@ -134,7 +112,7 @@ fn remove_voxel(
                 tmp += 4;
             }
         } else {
-            for (id, vals) in mesh.attributes_mut() {
+            for (_, vals) in mesh.attributes_mut() {
                 vals.swap_remove(quad + 3);
                 vals.swap_remove(quad + 2);
                 vals.swap_remove(quad + 1);
@@ -155,7 +133,7 @@ fn remove_voxel(
     }
 }
 
-// function adds quads facing voxel.
+/// Function adds quads facing voxel.
 pub(crate) fn add_quads_facing(
     mesh: &mut Mesh,
     vivi: &mut VIVI,
@@ -165,8 +143,6 @@ pub(crate) fn add_quads_facing(
     voxel_dims: [f32; 3],
     dims: Dimensions,
 ) {
-    // Completed, Untested.
-    // TODO:
     let mut neig: Neighbors;
     for &(face, vmesh) in neighboring_voxels.iter() {
         neig = [false; 6];
@@ -185,7 +161,7 @@ pub(crate) fn add_quads_facing(
     }
 }
 
-// function adds a voxel after the big mesh has already been generated.
+/// Function adds a voxel after the big mesh has already been generated.
 fn add_voxel_after_gen(
     neig: Neighbors,
     main_mesh: &mut Mesh,
