@@ -38,7 +38,7 @@ Greedy Meshing is even more effecient than Culling, but it makes very limiting c
 - You know the drill - add this incantation to your project's Cargo.toml file:
   ```toml
   [dependencies]
-  bevy_meshem = "0.1.1"
+  bevy_meshem = "0.2.0"
   ```
 
 ## Usage
