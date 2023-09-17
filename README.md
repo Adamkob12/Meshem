@@ -14,7 +14,7 @@ Currently in pre-release stages of development.
 ## Features
 ### ___Generate 3d meshes:___
 Just define a data structure that implements the simple "VoxelRegistry" trait (see examples and documentation) and you can turn any array of voxels into a 3d mesh.
-![update mesh video](assets/Screenshots/Showcase1.mov)
+![update mesh video](assets/Screenshots/video1.gif)
 ### ___Run time mesh updating in O(1):___
 Added in 0.2, this features allows users to easily update the mesh after it has been generated, without any need for regenerating. See the new update_mesh_example.
 ### "The Naive Method"
