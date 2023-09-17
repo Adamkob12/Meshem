@@ -1,16 +1,14 @@
 #![allow(dead_code, unused_imports)]
-pub(crate) mod default_block;
 pub mod face;
 pub(crate) mod mesh_metadata;
 pub(crate) mod meshem;
 pub(crate) mod update;
 pub(crate) mod util;
-pub(crate) mod voxel;
+pub(crate) mod voxel_mesh;
 
 use bevy::render::mesh::{Mesh, MeshVertexAttribute};
 
 pub mod prelude {
-    pub use crate::default_block::*;
     pub use crate::face::Face::*;
     pub use crate::face::*;
     pub use crate::mesh_metadata::*;
@@ -18,6 +16,7 @@ pub mod prelude {
     pub use crate::update::*;
     pub use crate::util::vav::*;
     pub use crate::util::*;
+    pub use crate::voxel_mesh::*;
     pub use crate::VoxelRegistry;
     pub use crate::*;
 }

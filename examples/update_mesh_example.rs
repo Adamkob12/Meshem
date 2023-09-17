@@ -13,12 +13,38 @@ fn main() {
     let mut app = App::new();
     app.add_plugins(DefaultPlugins).add_plugins(WireframePlugin);
 
-    let mesh = generate_voxel_mesh([1.0, 5.0, 1.0]);
-    app.insert_resource(BlockRegistry { block: mesh })
-        .insert_resource(AmbientLight {
-            brightness: 0.3,
-            color: Color::WHITE,
-        });
+    let mesh = generate_voxel_mesh(
+        [1.0, 1.0, 1.0],
+        [1, 4],
+        [
+            (Top, [0, 0]),
+            (Bottom, [0, 0]),
+            (Right, [0, 0]),
+            (Left, [0, 0]),
+            (Back, [0, 0]),
+            (Forward, [0, 0]),
+        ],
+    );
+    let mesh2 = generate_voxel_mesh(
+        [1.0, 1.0, 1.0],
+        [1, 4],
+        [
+            (Top, [0, 1]),
+            (Bottom, [0, 1]),
+            (Right, [0, 1]),
+            (Left, [0, 1]),
+            (Back, [0, 1]),
+            (Forward, [0, 1]),
+        ],
+    );
+    app.insert_resource(BlockRegistry {
+        grass: mesh,
+        dirt: mesh2,
+    })
+    .insert_resource(AmbientLight {
+        brightness: 0.3,
+        color: Color::WHITE,
+    });
 
     app.add_systems(Startup, setup).add_systems(
         Update,
@@ -58,9 +84,22 @@ fn setup(
     mut materials: ResMut<Assets<StandardMaterial>>,
     // wireframe_config: ResMut<WireframeConfig>,
     mut meshes: ResMut<Assets<Mesh>>,
+    asset_server: Res<AssetServer>,
 ) {
-    let grid: Vec<u16> = vec![1; FACTOR * FACTOR * FACTOR];
+    let mut grid: Vec<u16> = vec![1; FACTOR * FACTOR * FACTOR];
+    grid = grid
+        .iter_mut()
+        .enumerate()
+        .map(|(i, x)| {
+            if i >= FACTOR * FACTOR * FACTOR - FACTOR * FACTOR {
+                2
+            } else {
+                *x
+            }
+        })
+        .collect();
     let dims: Dimensions = (FACTOR, FACTOR, FACTOR);
+    let texture_mesh = asset_server.load("array_texture.png");
 
     let (culled_mesh, metadata) = mesh_grid(
         dims,
@@ -74,8 +113,9 @@ fn setup(
         PbrBundle {
             mesh: culled_mesh_handle,
             material: materials.add(StandardMaterial {
-                base_color: Color::LIME_GREEN,
-                alpha_mode: AlphaMode::Mask(0.5),
+                // base_color: Color::LIME_GREEN,
+                // alpha_mode: AlphaMode::Mask(0.5),
+                base_color_texture: Some(texture_mesh),
                 ..default()
             }),
             ..default()
@@ -159,7 +199,8 @@ fn setup(
 
 #[derive(Resource)]
 struct BlockRegistry {
-    block: Mesh,
+    grass: Mesh,
+    dirt: Mesh,
 }
 
 /// The important part! Without implementing a [`VoxelRegistry`], you can't use the function.
@@ -174,20 +215,26 @@ impl VoxelRegistry for BlockRegistry {
         if *voxel == 0 {
             return None;
         }
-        Some(&self.block)
+        if *voxel == 1 {
+            return Some(&self.dirt);
+        }
+        if *voxel == 2 {
+            return Some(&self.grass);
+        }
+        None
     }
     /// Important function that tells our Algorithm if the Voxel is "full", for example, the Air
     /// in minecraft is not "full", but it is still on the chunk data, to singal there is nothing.
     fn is_voxel(&self, voxel: &u16) -> bool {
         return *voxel != 0;
     }
-    /// The center of the Mesh, out mesh is defined in src/default_block.rs, just a constant.
+    /// The center of the Mesh, out mesh is defined in src/voxel_mesh.rs, just a constant.
     fn get_center(&self) -> [f32; 3] {
         return [0.0, 0.0, 0.0];
     }
-    /// The dimensions of the Mesh, out mesh is defined in src/default_block.rs, just a constant.
+    /// The dimensions of the Mesh, out mesh is defined in src/voxel_mesh.rs, just a constant.
     fn get_voxel_dimensions(&self) -> [f32; 3] {
-        return [1.0, 5.0, 1.0];
+        return [1.0, 1.0, 1.0];
     }
     /// The attributes we want to take from out voxels, note that using a lot of different
     /// attributes will likely lead to performance problems and unpredictible behaviour.

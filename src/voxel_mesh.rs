@@ -1,15 +1,28 @@
 //! A module containing the "default block", it is used in the examples,
 //! it is simple and easy to work with.
+use crate::prelude::*;
 use bevy::prelude::*;
 use bevy::render::mesh::Indices;
 use bevy::render::render_resource::PrimitiveTopology;
 
 /// Function that generates the mesh of a voxel.
-pub fn generate_voxel_mesh(voxel_dims: [f32; 3]) -> Mesh {
+pub fn generate_voxel_mesh(
+    voxel_dims: [f32; 3],
+    texture_atlas_dims: [usize; 2],
+    texture: [(Face, [usize; 2]); 6],
+) -> Mesh {
     let mut cube_mesh = Mesh::new(PrimitiveTopology::TriangleList);
     let y = voxel_dims[1] / 2.0;
     let x = voxel_dims[0] / 2.0;
     let z = voxel_dims[2] / 2.0;
+
+    let u: f32 = 1.0 / (texture_atlas_dims[0] as f32);
+    let v: f32 = 1.0 / (texture_atlas_dims[1] as f32);
+
+    let mut uvs: [[f32; 2]; 6] = [[0.0, 0.0]; 6];
+    texture
+        .iter()
+        .for_each(|(f, [a, b])| uvs[*f as usize] = [*a as f32 * u, *b as f32 * v]);
 
     #[rustfmt::skip]
     cube_mesh.insert_attribute(
@@ -56,17 +69,17 @@ pub fn generate_voxel_mesh(voxel_dims: [f32; 3]) -> Mesh {
         Mesh::ATTRIBUTE_UV_0,
         vec![
             // Assigning the UV coords for the top side.
-            [0.0, 0.2], [0.0, 0.0], [1.0, 0.0], [1.0, 0.25],
-            // Assigning the UV coords for the bottom side.
-            [0.0, 0.45], [0.0, 0.25], [1.0, 0.25], [1.0, 0.45],
+            uvs[0], [uvs[0][0] + u, uvs[0][1]], [uvs[0][0] + u, uvs[0][1] + v], [uvs[0][0], uvs[0][1] + v],           
+            // Assigning the UV coords for the bottom side
+            uvs[1], [uvs[1][0] + u, uvs[1][1]], [uvs[1][0] + u, uvs[1][1] + v], [uvs[1][0], uvs[1][1] + v],           
             // Assigning the UV coords for the right side.
-            [1.0, 0.45], [0.0, 0.45], [0.0, 0.2], [1.0, 0.2],
+            uvs[2], [uvs[2][0] + u, uvs[2][1]], [uvs[2][0] + u, uvs[2][1] + v], [uvs[2][0], uvs[2][1] + v],           
             // Assigning the UV coords for the left side.
-            [1.0, 0.45], [0.0, 0.45], [0.0, 0.2], [1.0, 0.2],
+            uvs[3], [uvs[3][0] + u, uvs[3][1]], [uvs[3][0] + u, uvs[3][1] + v], [uvs[3][0], uvs[3][1] + v],           
             // Assigning the UV coords for the back side.
-            [0.0, 0.45], [0.0, 0.2], [1.0, 0.2], [1.0, 0.45],
+            uvs[4], [uvs[5][0] + u, uvs[4][1]], [uvs[4][0] + u, uvs[4][1] + v], [uvs[4][0], uvs[4][1] + v],           
             // Assigning the UV coords for the forward side.
-            [0.0, 0.45], [0.0, 0.2], [1.0, 0.2], [1.0, 0.45],
+            uvs[5], [uvs[5][0] + u, uvs[5][1]], [uvs[5][0] + u, uvs[5][1] + v], [uvs[5][0], uvs[5][1] + v],           
         ],
     );
 
