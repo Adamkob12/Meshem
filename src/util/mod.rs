@@ -1,8 +1,6 @@
-pub(crate) mod vav;
+pub mod vav;
 
-pub use vav::*;
-
-use crate::{Dimensions, Face};
+use crate::prelude::{Dimensions, Face};
 
 pub(crate) fn in_range(x: usize, bot: usize, top: usize) -> bool {
     return bot <= x && x < top;
@@ -31,6 +29,10 @@ pub(crate) fn one_d_cords(threed: (usize, usize, usize), dims: (usize, usize, us
     threed.2 * (dims.0 * dims.1) + threed.1 * dims.0 + threed.0
 }
 
+/// Function to get the neighbor towards the `Face` in a 3d grid.
+/// None if the neighbor is out of bounds. For example:
+/// assert_eq!(get_neighbor(0, Top, (2,2,2)), Some(5));
+/// assert_eq!(get_neighbor(5, Top, (2,2,2)), None);
 pub fn get_neighbor(voxel: usize, face: Face, dims: Dimensions) -> Option<usize> {
     let a = three_d_cords(voxel, dims);
     match face {

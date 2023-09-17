@@ -2,9 +2,7 @@
 #[allow(unused_imports)]
 use bevy::pbr::wireframe::{Wireframe, WireframeConfig, WireframePlugin};
 use bevy::prelude::*;
-use bevy_meshem::default_block::*;
-use bevy_meshem::meshem::*;
-use bevy_meshem::*;
+use bevy_meshem::prelude::*;
 
 /// Constants for us to use.
 const FACTOR: usize = 10;
@@ -16,7 +14,7 @@ fn main() {
     app.add_plugins(DefaultPlugins).add_plugins(WireframePlugin);
 
     app.insert_resource(BlockRegistry {
-        block: default_block(),
+        block: generate_voxel_mesh([1.0, 1.0, 1.0], [0, 0], [(Top, [0, 0]); 6]),
     })
     .insert_resource(AmbientLight {
         brightness: 1.5,

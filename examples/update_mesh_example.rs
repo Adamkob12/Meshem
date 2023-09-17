@@ -2,24 +2,44 @@
 #[allow(unused_imports, dead_code)]
 use bevy::pbr::wireframe::{Wireframe, WireframeConfig, WireframePlugin};
 use bevy::prelude::*;
-use bevy_meshem::default_block::*;
-use bevy_meshem::meshem::*;
-use bevy_meshem::update::*;
-use bevy_meshem::util::get_neighbor;
-use bevy_meshem::*;
+use bevy_meshem::prelude::*;
 use rand::prelude::*;
 
 /// Constants for us to use.
-const FACTOR: usize = 6;
+const FACTOR: usize = 8;
 const SPEED: f32 = FACTOR as f32 * 2.0;
-const MESHING_ALGORITHM: MeshingAlgorithm = MeshingAlgorithm::Culling;
 
 fn main() {
     let mut app = App::new();
     app.add_plugins(DefaultPlugins).add_plugins(WireframePlugin);
 
+    let mesh = generate_voxel_mesh(
+        [1.0, 1.0, 1.0],
+        [1, 4],
+        [
+            (Top, [0, 0]),
+            (Bottom, [0, 0]),
+            (Right, [0, 0]),
+            (Left, [0, 0]),
+            (Back, [0, 0]),
+            (Forward, [0, 0]),
+        ],
+    );
+    let mesh2 = generate_voxel_mesh(
+        [1.0, 1.0, 1.0],
+        [1, 4],
+        [
+            (Top, [0, 1]),
+            (Bottom, [0, 1]),
+            (Right, [0, 1]),
+            (Left, [0, 1]),
+            (Back, [0, 1]),
+            (Forward, [0, 1]),
+        ],
+    );
     app.insert_resource(BlockRegistry {
-        block: default_block(),
+        grass: mesh,
+        dirt: mesh2,
     })
     .insert_resource(AmbientLight {
         brightness: 0.3,
@@ -64,19 +84,38 @@ fn setup(
     mut materials: ResMut<Assets<StandardMaterial>>,
     // wireframe_config: ResMut<WireframeConfig>,
     mut meshes: ResMut<Assets<Mesh>>,
+    asset_server: Res<AssetServer>,
 ) {
-    let grid: Vec<u16> = vec![1; FACTOR * FACTOR * FACTOR];
+    let mut grid: Vec<u16> = vec![1; FACTOR * FACTOR * FACTOR];
+    grid = grid
+        .iter_mut()
+        .enumerate()
+        .map(|(i, x)| {
+            if i >= FACTOR * FACTOR * FACTOR - FACTOR * FACTOR {
+                2
+            } else {
+                *x
+            }
+        })
+        .collect();
     let dims: Dimensions = (FACTOR, FACTOR, FACTOR);
+    let texture_mesh = asset_server.load("array_texture.png");
 
-    let (culled_mesh, metadata) =
-        mesh_grid(dims, grid.clone(), breg.into_inner(), MESHING_ALGORITHM).unwrap();
+    let (culled_mesh, metadata) = mesh_grid(
+        dims,
+        grid.clone(),
+        breg.into_inner(),
+        MeshingAlgorithm::Culling,
+    )
+    .unwrap();
     let culled_mesh_handle: Handle<Mesh> = meshes.add(culled_mesh.clone());
     commands.spawn((
         PbrBundle {
             mesh: culled_mesh_handle,
             material: materials.add(StandardMaterial {
-                base_color: Color::LIME_GREEN,
-                alpha_mode: AlphaMode::Mask(0.5),
+                // base_color: Color::LIME_GREEN,
+                // alpha_mode: AlphaMode::Mask(0.5),
+                base_color_texture: Some(texture_mesh),
                 ..default()
             }),
             ..default()
@@ -160,7 +199,8 @@ fn setup(
 
 #[derive(Resource)]
 struct BlockRegistry {
-    block: Mesh,
+    grass: Mesh,
+    dirt: Mesh,
 }
 
 /// The important part! Without implementing a [`VoxelRegistry`], you can't use the function.
@@ -175,18 +215,24 @@ impl VoxelRegistry for BlockRegistry {
         if *voxel == 0 {
             return None;
         }
-        Some(&self.block)
+        if *voxel == 1 {
+            return Some(&self.dirt);
+        }
+        if *voxel == 2 {
+            return Some(&self.grass);
+        }
+        None
     }
     /// Important function that tells our Algorithm if the Voxel is "full", for example, the Air
     /// in minecraft is not "full", but it is still on the chunk data, to singal there is nothing.
     fn is_voxel(&self, voxel: &u16) -> bool {
         return *voxel != 0;
     }
-    /// The center of the Mesh, out mesh is defined in src/default_block.rs, just a constant.
+    /// The center of the Mesh, out mesh is defined in src/voxel_mesh.rs, just a constant.
     fn get_center(&self) -> [f32; 3] {
         return [0.0, 0.0, 0.0];
     }
-    /// The dimensions of the Mesh, out mesh is defined in src/default_block.rs, just a constant.
+    /// The dimensions of the Mesh, out mesh is defined in src/voxel_mesh.rs, just a constant.
     fn get_voxel_dimensions(&self) -> [f32; 3] {
         return [1.0, 1.0, 1.0];
     }

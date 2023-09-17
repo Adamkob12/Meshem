@@ -1,12 +1,8 @@
 //! Pretty hefty module, it defines a lot of needed methods on the VertexAttributeValues,
 //! that makes working with them more comfortable. It is very spaghetti but it helps with the
 //! readabillity of main API.
-use std::borrow::BorrowMut;
-
-use bevy::render::{
-    mesh::{Indices, MeshVertexAttribute, MeshVertexAttributeId, VertexAttributeValues},
-    render_resource::VertexFormat,
-};
+#![allow(unused_variables)]
+use bevy::render::{mesh::VertexAttributeValues, render_resource::VertexFormat};
 pub(crate) trait VAVutils {
     fn extend(&mut self, t: &Self);
     fn filter_bool_array(&self, index_filter: Vec<bool>) -> Self;
