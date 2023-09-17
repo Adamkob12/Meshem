@@ -1,11 +1,10 @@
 # Bevy Meshem
-[Crates.io](https://crates.io/crates/bevy_meshem),
-[docs](https://docs.rs/bevy_meshem)
 
 Bevy Compatibility:
 
 | Bevy Version |  bevy_meshem         |
 |--------------|----------------------|
+| `0.11`       | `0.2`
 | `0.11`       | `0.1.1`               |
 
 Bevy Meshem is a Rust crate designed to provide meshing algorithms for voxel grids, enabling you to create cohesive 3D mesh structures from a grid of cubic voxels.
@@ -13,19 +12,12 @@ Similar to the mechanics in Minecraft, Bevy Meshem offers a powerful and flexibl
 Currently in pre-release stages of development.
 
 ## Features
-
-### Meshing Algorithms: 
-Bevy Meshem comes with a collection (currently 2, less is more..? :) of meshing algorithms that allow you to generate complex meshes from voxel data efficiently.
-
-### Seamless Bevy Integration: 
-Designed to seamlessly integrate with the Bevy game engine, Bevy Meshem is tailored for use in game development, ensuring easy incorporation into your Bevy-powered projects.
-
-### Performance: 
-Bevy Meshem focuses on performance, utilizing Rust's performance benefits to create meshes quickly and efficiently, even for large voxel grids.
-
-## Currently supported meshing algorithms
-
-### "The Naive Method" 
+### ___Generate 3d meshes:___
+Just define a data structure that implements the simple "VoxelRegistry" trait (see examples and documentation) and you can turn any array of voxels into a 3d mesh.
+![update mesh video](assets/Screenshots/Showcase1.mov)
+### ___Run time mesh updating in O(1):___
+Added in 0.2, this features allows users to easily update the mesh after it has been generated, without any need for regenerating. See the new update_mesh_example.
+### "The Naive Method"
 Iterate over the grid and generate a matching cube for each voxel (Also reffered to as the "default" as this method doesn't offer any optimization) examples: (screenshots from examples/simple_example.rs)
 ![Naive method screenshot](assets/Screenshots/ScreenshotS.png)
 
@@ -39,7 +31,7 @@ engine, though the specifics are obviously unknown. examples:
 10x10x10 grid, but in contrast to The Naive Method, only 2400 are rendered.
 
 ### Not supported: "Greedy Meshing"
-Greedy Meshing is even more effecient than Culling, but it makes very limiting compromises, making it somewhat undesirable. Support for this method is likely to be added in later stages.
+Greedy Meshing is even more effecient than Culling, but it makes very limiting compromises (specifically to the texture of the mesh), making it somewhat undesirable. Support for this method might be added in later stages.
 
 ## Requirements & Installation
 - You must be familliar with the Bevy game engine, and of course the Rust programming language.
@@ -54,7 +46,6 @@ The example in examples/simple_example.rs shows what you need to do to get start
 
 ## Design Goals
 Flexibillity, Stabillity, User experience and Performance.
-These values will always come before more features.
 
 ## Contributing
 Contributions are very welcome! This project is currently in its early stages and operates closely with the Bevy rendering API.
