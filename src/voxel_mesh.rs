@@ -77,7 +77,7 @@ pub fn generate_voxel_mesh(
             // Assigning the UV coords for the left side.
             uvs[3], [uvs[3][0] + u, uvs[3][1]], [uvs[3][0] + u, uvs[3][1] + v], [uvs[3][0], uvs[3][1] + v],           
             // Assigning the UV coords for the back side.
-            uvs[4], [uvs[5][0] + u, uvs[4][1]], [uvs[4][0] + u, uvs[4][1] + v], [uvs[4][0], uvs[4][1] + v],           
+            uvs[4], [uvs[4][0] + u, uvs[4][1]], [uvs[4][0] + u, uvs[4][1] + v], [uvs[4][0], uvs[4][1] + v],           
             // Assigning the UV coords for the forward side.
             uvs[5], [uvs[5][0] + u, uvs[5][1]], [uvs[5][0] + u, uvs[5][1] + v], [uvs[5][0], uvs[5][1] + v],           
         ],
