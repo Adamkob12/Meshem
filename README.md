@@ -46,6 +46,15 @@ Greedy Meshing is even more effecient than Culling, but it makes very limiting c
 ## Usage
 The example in examples/simple_example.rs shows what you need to do to get started.
 
+***In 0.1, you provide a VoxelRegistry and a grid of voxels, and you get a mesh.***
+
+<img width="609" alt="Screenshot 2023-09-28 at 21 59 53" src="https://github.com/Adamkob12/bevy_meshem/assets/46227443/4f74b341-6de2-45db-ad0a-b3352f98dc7a">
+
+***In 0.2, you can also log voxel changes in the MeshMD data-structure, and use the MeshMD data-structure to update the Mesh at run-time***
+
+<img width="615" alt="Screenshot 2023-09-28 at 22 05 47" src="https://github.com/Adamkob12/bevy_meshem/assets/46227443/bc8459ad-d6ea-4eef-8677-c2b7688db1e9">
+
+
 ## Design Goals
 Flexibillity, Stabillity, User experience and Performance.
 
