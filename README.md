@@ -1,6 +1,7 @@
 # Bevy Meshem
 ## ***Showcase (taken from [minecraft_bevy](https://github.com/Adamkob12/minecraft_bevy)):***
 ![ezgif com-resize](https://github.com/Adamkob12/bevy_meshem/assets/46227443/a28e2de7-8e42-47fa-b02f-ac9e2b343f29)
+
 (The choppiness is from the loss compression I had to use to get the gif under 10MB)
 
 Bevy Compatibility:
