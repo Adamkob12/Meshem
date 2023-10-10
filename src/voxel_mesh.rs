@@ -8,8 +8,8 @@ use bevy::render::render_resource::PrimitiveTopology;
 /// Function that generates the mesh of a voxel.
 pub fn generate_voxel_mesh(
     voxel_dims: [f32; 3],
-    texture_atlas_dims: [usize; 2],
-    texture: [(Face, [usize; 2]); 6],
+    texture_atlas_dims: [u32; 2],
+    texture: [(Face, [u32; 2]); 6],
 ) -> Mesh {
     let mut cube_mesh = Mesh::new(PrimitiveTopology::TriangleList);
     let y = voxel_dims[1] / 2.0;

@@ -14,6 +14,7 @@ pub mod prelude {
     pub use crate::mesh_metadata::*;
     pub use crate::meshem::*;
     pub use crate::update::*;
+    pub use crate::util::compressed_voxel_grid::*;
     pub use crate::util::vav::*;
     pub use crate::util::*;
     pub use crate::voxel_mesh::*;
@@ -38,7 +39,7 @@ pub trait VoxelRegistry {
     fn all_attributes(&self) -> Vec<MeshVertexAttribute>;
 }
 
-/// (width, length, height) - note that bevy considers the "y position" to be height.
+/// (width, height, length) - note that bevy considers the "y position" to be height.
 pub type Dimensions = (usize, usize, usize);
 
 /// [+y, -y, +x, -x, +z, -z], true if that face is not covered.

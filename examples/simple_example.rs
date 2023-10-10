@@ -63,8 +63,15 @@ fn setup(
     let grid: Vec<u16> = vec![1; FACTOR * FACTOR * FACTOR];
     let dims: Dimensions = (FACTOR, FACTOR, FACTOR);
 
-    let (culled_mesh, metadata) =
-        mesh_grid(dims, grid, breg.into_inner(), MESHING_ALGORITHM).unwrap();
+    let (culled_mesh, metadata) = mesh_grid(
+        dims,
+        // Automatically cull the bottom when generating the mesh
+        &[Bottom],
+        grid.as_slice(),
+        breg.into_inner(),
+        MESHING_ALGORITHM,
+    )
+    .unwrap();
     let culled_mesh_handle: Handle<Mesh> = meshes.add(culled_mesh.clone());
     commands.spawn((
         PbrBundle {
@@ -317,7 +324,14 @@ fn regenerate_mesh(
             MeshingAlgorithm::Naive => m.ma = MeshingAlgorithm::Culling,
         }
 
-        (*mesh, m.meta) = mesh_grid(dims, grid, breg.into_inner(), m.ma.clone()).unwrap();
+        (*mesh, m.meta) = mesh_grid(
+            dims,
+            &[Bottom],
+            grid.as_slice(),
+            breg.into_inner(),
+            m.ma.clone(),
+        )
+        .unwrap();
 
         t.sections[0].value = format!("Press -C- To regenerate the mesh with a different Algorithm\nVertices Count: {}\nMeshing Algorithm: {:?}",mesh.count_vertices(),m.ma);
         return;
