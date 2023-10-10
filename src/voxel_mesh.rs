@@ -10,6 +10,7 @@ pub fn generate_voxel_mesh(
     voxel_dims: [f32; 3],
     texture_atlas_dims: [u32; 2],
     texture: [(Face, [u32; 2]); 6],
+    padding: f32,
 ) -> Mesh {
     let mut cube_mesh = Mesh::new(PrimitiveTopology::TriangleList);
     let y = voxel_dims[1] / 2.0;
@@ -19,10 +20,13 @@ pub fn generate_voxel_mesh(
     let u: f32 = 1.0 / (texture_atlas_dims[0] as f32);
     let v: f32 = 1.0 / (texture_atlas_dims[1] as f32);
 
+    let padding_u = padding / (texture_atlas_dims[0] as f32);
+    let padding_v = padding / (texture_atlas_dims[1] as f32);
+
     let mut uvs: [[f32; 2]; 6] = [[0.0, 0.0]; 6];
-    texture
-        .iter()
-        .for_each(|(f, [a, b])| uvs[*f as usize] = [*a as f32 * u, *b as f32 * v]);
+    texture.iter().for_each(|(f, [a, b])| {
+        uvs[*f as usize] = [*a as f32 * u + padding_u, *b as f32 * v + padding_v]
+    });
 
     #[rustfmt::skip]
     cube_mesh.insert_attribute(
@@ -69,17 +73,17 @@ pub fn generate_voxel_mesh(
         Mesh::ATTRIBUTE_UV_0,
         vec![
             // Assigning the UV coords for the top side.
-            uvs[0], [uvs[0][0] + u, uvs[0][1]], [uvs[0][0] + u, uvs[0][1] + v], [uvs[0][0], uvs[0][1] + v],           
+            uvs[0], [uvs[0][0] + u - padding_u * 2.0, uvs[0][1]], [uvs[0][0] + u - padding_u * 2.0, uvs[0][1] + v - padding_v * 2.0], [uvs[0][0], uvs[0][1] + v - padding_v * 2.0],           
             // Assigning the UV coords for the bottom side
-            uvs[1], [uvs[1][0] + u, uvs[1][1]], [uvs[1][0] + u, uvs[1][1] + v], [uvs[1][0], uvs[1][1] + v],           
-            // Assigning the UV coords for the right side.
-            uvs[2], [uvs[2][0] + u, uvs[2][1]], [uvs[2][0] + u, uvs[2][1] + v], [uvs[2][0], uvs[2][1] + v],           
-            // Assigning the UV coords for the left side.
-            uvs[3], [uvs[3][0] + u, uvs[3][1]], [uvs[3][0] + u, uvs[3][1] + v], [uvs[3][0], uvs[3][1] + v],           
-            // Assigning the UV coords for the back side.
-            uvs[4], [uvs[4][0] + u, uvs[4][1]], [uvs[4][0] + u, uvs[4][1] + v], [uvs[4][0], uvs[4][1] + v],           
-            // Assigning the UV coords for the forward side.
-            uvs[5], [uvs[5][0] + u, uvs[5][1]], [uvs[5][0] + u, uvs[5][1] + v], [uvs[5][0], uvs[5][1] + v],           
+            [uvs[1][0] + u - padding_u * 2.0, uvs[1][1] + v - padding_v * 2.0], [uvs[1][0], uvs[1][1] + v - padding_v * 2.0], uvs[1], [uvs[1][0] + u - padding_u * 2.0, uvs[1][1]], 
+            // Assigning the UV coords for the top side.
+            uvs[2], [uvs[2][0] + u - padding_u * 2.0, uvs[2][1]], [uvs[2][0] + u - padding_u * 2.0, uvs[2][1] + v - padding_v * 2.0], [uvs[2][0], uvs[2][1] + v - padding_v * 2.0],           
+            // Assigning the UV coords for the bottom side
+            [uvs[3][0] + u - padding_u * 2.0, uvs[3][1] + v - padding_v * 2.0], [uvs[3][0], uvs[3][1] + v - padding_v * 2.0], uvs[3], [uvs[3][0] + u - padding_u * 2.0, uvs[3][1]], 
+            // Assigning the UV coords for the top side.
+            uvs[4], [uvs[4][0] + u - padding_u * 2.0, uvs[4][1]], [uvs[4][0] + u - padding_u * 2.0, uvs[4][1] + v - padding_v * 2.0], [uvs[4][0], uvs[4][1] + v - padding_v * 2.0],           
+            // Assigning the UV coords for the bottom side
+            [uvs[5][0] + u - padding_u * 2.0, uvs[5][1] + v - padding_v * 2.0], [uvs[5][0], uvs[5][1] + v - padding_v * 2.0], uvs[5], [uvs[5][0] + u - padding_u * 2.0, uvs[5][1]], 
         ],
     );
 
