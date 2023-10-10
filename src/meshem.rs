@@ -1,10 +1,8 @@
 //! This module contains the main functions themself, and some added utilities and defs.
 use crate::prelude::*;
-use crate::util::*;
 use bevy::prelude::*;
 use bevy::render::mesh::{Indices, MeshVertexAttribute, VertexAttributeValues};
 use bevy::render::render_resource::PrimitiveTopology;
-use Face::*;
 
 /// All the variants for the Meshing algorithm.
 #[derive(Debug, Clone)]
@@ -14,9 +12,13 @@ pub enum MeshingAlgorithm {
 }
 
 /// Arguments:
-/// - [`dims`](Dimensions): the dimensions of the grid, (width, len, height). (eg: (16, 16, 256))
-/// - [`grid`](Vec<T>): one dimentional array of voxels, to turn into a single mesh, the function
-///     assumes the real grid is 3 dimentional, and that the width, height and length math the
+/// - [`dims`](Dimensions): the dimensions of the grid, (width, height, length). (eg: (16, 256, 16))
+/// - [`outer_layer`]([Face; 6]): Which edges (corresponding to their Face direction) of the mesh
+///     should we cull. ex: in Minecraft you wouldn't cull the top because the player can see the
+///     top of the chunk. But culling the bottom is ok because the player "shouldn't be there" so
+///     he won't see it.
+/// - [`grid`](&[T]): one dimentional slice of voxels, to turn into a single mesh, the function
+///     assumes the real grid is 3 dimentional, and that the width, height and length match the
 ///     dimensions given with the dims argument.
 /// - [`reg`](VoxelRegistry): this is a data structure that will return the desired mesh attribute
 ///     we need, but(!) the size of each of the voxels MUST be the same across the entire grid.
@@ -30,7 +32,8 @@ pub enum MeshingAlgorithm {
 /// - [`None`]: couldn't create mesh
 pub fn mesh_grid<T>(
     dims: Dimensions,
-    grid: Vec<T>,
+    outer_layer: &[Face],
+    grid: &[T],
     reg: &impl VoxelRegistry<Voxel = T>,
     ma: MeshingAlgorithm,
 ) -> Option<(Mesh, MeshMD<T>)> {
@@ -44,10 +47,18 @@ pub fn mesh_grid<T>(
         the one dimentional grid array."
     );
 
+    let [cull_top, cull_bottom, cull_right, cull_left, cull_back, cull_forward] = {
+        let mut r = [true, true, true, true, true, true];
+        for f in outer_layer {
+            r[*f as usize] = false;
+        }
+        r
+    };
     let width = dims.0;
     let length = dims.1;
     let height = dims.2;
     let t = width * length * height;
+    let mut rle_bool_voxel = RleVec::new();
 
     let mut indices: Vec<u32> = vec![];
     let mut vertices: Vec<(MeshVertexAttribute, VertexAttributeValues)> = vec![];
@@ -77,32 +88,32 @@ pub fn mesh_grid<T>(
                 if in_range(k + 1, 0, height) {
                     neig[0] = !reg.is_voxel(&grid[above]);
                 } else {
-                    neig[0] = true;
+                    neig[0] = cull_top;
                 }
                 if in_range(k, 1, t) {
                     neig[1] = !reg.is_voxel(&grid[below]);
                 } else {
-                    neig[1] = true;
+                    neig[1] = cull_bottom;
                 }
                 if in_range(i + 1, 0, width) {
                     neig[2] = !reg.is_voxel(&grid[right]);
                 } else {
-                    neig[2] = true;
+                    neig[2] = cull_right;
                 }
                 if in_range(i, 1, t) {
                     neig[3] = !reg.is_voxel(&grid[left]);
                 } else {
-                    neig[3] = true;
+                    neig[3] = cull_left;
                 }
                 if in_range(j + 1, 0, length) {
                     neig[4] = !reg.is_voxel(&grid[back]);
                 } else {
-                    neig[4] = true;
+                    neig[4] = cull_back;
                 }
                 if in_range(j, 1, t) {
                     neig[5] = !reg.is_voxel(&grid[forward]);
                 } else {
-                    neig[5] = true;
+                    neig[5] = cull_forward;
                 }
 
                 match ma {
@@ -127,6 +138,9 @@ pub fn mesh_grid<T>(
                             center,
                             position_offset,
                         );
+                        rle_bool_voxel.push(true, 1);
+                    } else {
+                        rle_bool_voxel.push(false, 1);
                     }
                 }
             }

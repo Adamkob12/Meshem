@@ -1,3 +1,4 @@
+pub(crate) mod compressed_voxel_grid;
 pub mod vav;
 
 use crate::prelude::{Dimensions, Face};

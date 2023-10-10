@@ -103,7 +103,8 @@ fn setup(
 
     let (culled_mesh, metadata) = mesh_grid(
         dims,
-        grid.clone(),
+        &[],
+        grid.as_slice(),
         breg.into_inner(),
         MeshingAlgorithm::Culling,
     )

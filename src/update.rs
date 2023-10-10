@@ -1,7 +1,5 @@
 use crate::prelude::*;
-use crate::util::*;
 use bevy::render::mesh::{Indices, VertexAttributeValues};
-use Face::*;
 
 /// The function updates the mesh according to the change log in the mesh meta data.
 pub fn update_mesh<T>(
@@ -28,6 +26,7 @@ pub fn update_mesh<T>(
             }
             n
         };
+
         let neighboring_voxels: Vec<(Face, &Mesh)> = {
             let mut r: Vec<(Face, &Mesh)> = vec![];
             for (i, j) in neighbors.iter().enumerate() {
