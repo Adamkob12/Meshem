@@ -125,7 +125,7 @@ pub fn mesh_grid<T>(
                     continue;
                 }
                 if in_range(cord, 0, t) {
-                    if let Some(v_mesh) = reg.get_mesh(&grid[cord]) {
+                    if let VoxelMesh::NormalCube(v_mesh) = reg.get_mesh(&grid[cord]) {
                         // add_vertices() is a private function that adds the vertices and
                         // indices to the running count of vertices and indices.
                         add_vertices(

@@ -27,7 +27,7 @@ pub mod prelude {
 pub trait VoxelRegistry {
     type Voxel: std::fmt::Debug + Eq + PartialEq;
     /// Returns None if the mesh is "irrelevant" as in it's air or not a Voxel.
-    fn get_mesh(&self, voxel: &Self::Voxel) -> Option<&Mesh>;
+    fn get_mesh(&self, voxel: &Self::Voxel) -> VoxelMesh<&Mesh>;
     /// Would this voxel cover the voxel that's located on it's `side`? for example, an air block
     /// would not cover any side, but a slab would only cover the bottom.
     fn is_covering(&self, voxel: &Self::Voxel, side: prelude::Face) -> bool;
@@ -41,6 +41,30 @@ pub trait VoxelRegistry {
 
 /// (width, height, length) - note that bevy considers the "y position" to be height.
 pub type Dimensions = (usize, usize, usize);
+
+pub enum VoxelMesh<T> {
+    NormalCube(T),
+    CustomMesh(T),
+    Null,
+}
+
+impl<T> VoxelMesh<T> {
+    pub fn unwrap(self) -> T {
+        match self {
+            Self::NormalCube(t) => t,
+            Self::CustomMesh(t) => t,
+            Self::Null => panic!(),
+        }
+    }
+
+    pub fn expect(self, msg: &str) -> T {
+        match self {
+            Self::NormalCube(t) => t,
+            Self::CustomMesh(t) => t,
+            Self::Null => panic!("{}", msg),
+        }
+    }
+}
 
 /// [+y, -y, +x, -x, +z, -z], true if that face is not covered.
 pub(crate) type Neighbors = [bool; 6];
