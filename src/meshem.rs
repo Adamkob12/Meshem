@@ -86,32 +86,32 @@ pub fn mesh_grid<T>(
                 );
 
                 if in_range(k + 1, 0, height) {
-                    neig[0] = !reg.is_voxel(&grid[above]);
+                    neig[0] = !reg.is_covering(&grid[above], Bottom);
                 } else {
                     neig[0] = cull_top;
                 }
                 if in_range(k, 1, t) {
-                    neig[1] = !reg.is_voxel(&grid[below]);
+                    neig[1] = !reg.is_covering(&grid[below], Top);
                 } else {
                     neig[1] = cull_bottom;
                 }
                 if in_range(i + 1, 0, width) {
-                    neig[2] = !reg.is_voxel(&grid[right]);
+                    neig[2] = !reg.is_covering(&grid[right], Left);
                 } else {
                     neig[2] = cull_right;
                 }
                 if in_range(i, 1, t) {
-                    neig[3] = !reg.is_voxel(&grid[left]);
+                    neig[3] = !reg.is_covering(&grid[left], Right);
                 } else {
                     neig[3] = cull_left;
                 }
                 if in_range(j + 1, 0, length) {
-                    neig[4] = !reg.is_voxel(&grid[back]);
+                    neig[4] = !reg.is_covering(&grid[back], Forward);
                 } else {
                     neig[4] = cull_back;
                 }
                 if in_range(j, 1, t) {
-                    neig[5] = !reg.is_voxel(&grid[forward]);
+                    neig[5] = !reg.is_covering(&grid[forward], Back);
                 } else {
                     neig[5] = cull_forward;
                 }

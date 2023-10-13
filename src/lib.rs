@@ -25,12 +25,12 @@ pub mod prelude {
 /// Implementing this trait for your own data-structure is the most important
 /// prerequesite if you want to use the function.
 pub trait VoxelRegistry {
-    type Voxel;
+    type Voxel: std::fmt::Debug + Eq + PartialEq;
     /// Returns None if the mesh is "irrelevant" as in it's air or not a Voxel.
     fn get_mesh(&self, voxel: &Self::Voxel) -> Option<&Mesh>;
-    /// Should the algorithm consider this Voxel "full"?, for example, in Minecraft,
-    /// "Air" would not be a full block because it doesn't block the view.
-    fn is_voxel(&self, voxel: &Self::Voxel) -> bool;
+    /// Would this voxel cover the voxel that's located on it's `side`? for example, an air block
+    /// would not cover any side, but a slab would only cover the bottom.
+    fn is_covering(&self, voxel: &Self::Voxel, side: prelude::Face) -> bool;
     /// The center of the voxel (physical center, the center of the default block is 0,0,0 eg)
     fn get_center(&self) -> [f32; 3];
     /// All the voxels must have standard and equal dimesions (y is up).
