@@ -25,7 +25,7 @@ fn main() {
             (Forward, [0, 0]),
         ],
         0.05,
-        0.8,
+        Some(0.8),
     );
     let mesh2 = generate_voxel_mesh(
         [1.0, 1.0, 1.0],
@@ -39,7 +39,7 @@ fn main() {
             (Forward, [0, 1]),
         ],
         0.05,
-        0.8,
+        Some(0.8),
     );
     app.insert_resource(BlockRegistry {
         grass: mesh,

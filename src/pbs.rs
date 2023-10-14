@@ -2,13 +2,14 @@
 //! where, regardless of a light source, the game applies a shadow to voxels based on their
 //! proximity to other voxels.
 use crate::prelude::*;
-use bevy::render::mesh::{Mesh, MeshVertexAttribute, VertexAttributeValues};
+use bevy::render::mesh::{Mesh, VertexAttributeValues};
 
 #[derive(Copy, Clone)]
+/// Parameters for Proximity Based Shadowing
 pub struct PbsParameters {
-    // recommended range: 0.0 - 0.2
+    /// How intense the shadow is. recommended range: 0.0 - 0.2
     pub pbs_value: f32,
-    // recommended range: 0.0 - 0.5
+    /// Smooth out the difference between two shadowed sides. recommended range: 0.0 - 0.5
     pub pbs_smoothing: f32,
 }
 
@@ -72,45 +73,3 @@ pub(crate) fn apply_pbs(
         }
     }
 }
-
-// pub(crate) fn apply_pbs_voxel(mesh: &mut Mesh, vivi: &VIVI, dims: Dimensions, voxel: usize) {
-//     let mut voxels = vec![];
-//     let (back, voxel, forward) = (
-//         get_neighbor(voxel, Forward, dims).unwrap_or(voxel),
-//         voxel,
-//         get_neighbor(voxel, Back, dims).unwrap_or(voxel),
-//     );
-//     for j in 0..4 {
-//         if let Some(t) = get_neighbor(voxel, Face::from(j), dims) {
-//             voxels.push(t);
-//         }
-//         if let Some(t) = get_neighbor(back, Face::from(j), dims) {
-//             voxels.push(t);
-//         }
-//         if let Some(t) = get_neighbor(forward, Face::from(j), dims) {
-//             voxels.push(t);
-//         }
-//     }
-//     voxels.push(voxel);
-//     voxels.push(forward);
-//     voxels.push(back);
-//
-//     for (i, quads) in voxels.iter().map(|x| (*x, &vivi.vivi[*x])) {
-//         for q in quads {
-//             let face = face_from_u32(q & REVERSE_OFFSET_CONST);
-//             let mut count = 0;
-//             if let Some(neigbhor) = get_neighbor(i, face, dims) {
-//                 for i in 0..6 {
-//                     if let Some(tmp) = get_neighbor(neigbhor, Face::from(i), dims) {
-//                         if !vivi.vivi[tmp].is_empty() {
-//                             count += 1;
-//                         }
-//                     }
-//                 }
-//             }
-//             if count != 0 {
-//                 apply_pbs_quad(mesh, vivi, i, face, count, );
-//             }
-//         }
-//     }
-// }

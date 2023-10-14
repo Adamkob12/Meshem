@@ -11,7 +11,7 @@ pub fn generate_voxel_mesh(
     texture_atlas_dims: [u32; 2],
     texture: [(Face, [u32; 2]); 6],
     padding: f32,
-    default_color_intensity: f32,
+    default_color_intensity: Option<f32>,
 ) -> Mesh {
     let mut cube_mesh = Mesh::new(PrimitiveTopology::TriangleList);
     let y = voxel_dims[1] / 2.0;
@@ -129,39 +129,38 @@ pub fn generate_voxel_mesh(
         ],
     );
 
-    #[rustfmt::skip]
-    cube_mesh.insert_attribute(
-        Mesh::ATTRIBUTE_COLOR,
-        vec![
-
-
-
-            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
-            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
-            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
-            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
-            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
-            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
-            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
-            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
-            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
-            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
-            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
-            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
-            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
-            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
-            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
-            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
-            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
-            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
-            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
-            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
-            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
-            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
-            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
-            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
-        ]
-    );
+    if let Some(color) = default_color_intensity {
+        #[rustfmt::skip]
+        cube_mesh.insert_attribute(
+            Mesh::ATTRIBUTE_COLOR,
+            vec![
+                [color, color, color, 1.0],
+                [color, color, color, 1.0],
+                [color, color, color, 1.0],
+                [color, color, color, 1.0],
+                [color, color, color, 1.0],
+                [color, color, color, 1.0],
+                [color, color, color, 1.0],
+                [color, color, color, 1.0],
+                [color, color, color, 1.0],
+                [color, color, color, 1.0],
+                [color, color, color, 1.0],
+                [color, color, color, 1.0],
+                [color, color, color, 1.0],
+                [color, color, color, 1.0],
+                [color, color, color, 1.0],
+                [color, color, color, 1.0],
+                [color, color, color, 1.0],
+                [color, color, color, 1.0],
+                [color, color, color, 1.0],
+                [color, color, color, 1.0],
+                [color, color, color, 1.0],
+                [color, color, color, 1.0],
+                [color, color, color, 1.0],
+                [color, color, color, 1.0],
+            ]
+        );
+    }
 
     // Create the triangles out of the 24 vertices we created.
     // To construct a square, we need 2 triangles, therefore 12 triangles in total.

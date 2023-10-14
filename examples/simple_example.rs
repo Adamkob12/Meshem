@@ -14,7 +14,7 @@ fn main() {
     app.add_plugins(DefaultPlugins).add_plugins(WireframePlugin);
 
     app.insert_resource(BlockRegistry {
-        block: generate_voxel_mesh([1.0, 1.0, 1.0], [0, 0], [(Top, [0, 0]); 6], 0.05, 0.8),
+        block: generate_voxel_mesh([1.0, 1.0, 1.0], [0, 0], [(Top, [0, 0]); 6], 0.05, Some(0.8)),
     })
     .insert_resource(AmbientLight {
         brightness: 1.5,

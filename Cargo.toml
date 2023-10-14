@@ -1,6 +1,6 @@
 [package]
 name = "bevy_meshem"
-version = "0.2.2"
+version = "0.2.3"
 edition = "2021"
 authors = ["Adam Kobzan <kobzan.adam@gmail.com>"]
 description = "A crate that offers a flexible and efficient way to generate meshes from a grid of Voxels"
