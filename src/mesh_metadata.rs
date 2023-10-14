@@ -6,7 +6,7 @@ use bevy::utils::hashbrown::HashMap;
 // each element of the field is a vector of its quads (a quad is 2 triangles (indices) made out of
 // 4 vertices to create a square, which )
 pub(crate) struct VIVI {
-    vivi: Vec<Vec<u32>>,
+    pub(crate) vivi: Vec<Vec<u32>>,
     pub(crate) map: HashMap<u32, u32>,
 }
 
@@ -85,7 +85,7 @@ pub enum VoxelChange {
 /// T is the voxel type, it needs to be the same as the voxel registry.
 pub struct MeshMD<T> {
     pub(crate) vivi: VIVI,
-    // The grid dimensions
+    pub(crate) pbs: Option<PbsParameters>,
     /// The dimensions of the 3d grid.
     pub dims: Dimensions,
     // T: the voxel type,

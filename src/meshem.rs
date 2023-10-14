@@ -1,4 +1,5 @@
 //! This module contains the main functions themself, and some added utilities and defs.
+use crate::pbs::*;
 use crate::prelude::*;
 use bevy::prelude::*;
 use bevy::render::mesh::{Indices, MeshVertexAttribute, VertexAttributeValues};
@@ -26,6 +27,9 @@ pub enum MeshingAlgorithm {
 ///     An example to create a [`VoxelRegistry`] is in the examples folder.
 /// - ['ma'](MeshingAlgorithm): The meshing algorithm to use - currently supports Culling and
 ///     Naive. (Culling is always better than Naive)
+/// - ['pbs']: Enable Proximity Based Shadowing (Some ..) or not (None). PBS is a technique often used in
+///     voxel based games that applies a shadow to the sides of a voxel depending on how many
+///     voxels are in the proximity.
 ///
 /// Return:
 /// - [`Some(mesh)`](Mesh): the mesh
@@ -36,6 +40,7 @@ pub fn mesh_grid<T>(
     grid: &[T],
     reg: &impl VoxelRegistry<Voxel = T>,
     ma: MeshingAlgorithm,
+    pbs: Option<PbsParameters>,
 ) -> Option<(Mesh, MeshMD<T>)> {
     let mut mesh = Mesh::new(PrimitiveTopology::TriangleList);
     let ch_len = grid.len();
@@ -86,32 +91,32 @@ pub fn mesh_grid<T>(
                 );
 
                 if in_range(k + 1, 0, height) {
-                    neig[0] = !reg.is_voxel(&grid[above]);
+                    neig[0] = !reg.is_covering(&grid[above], Bottom);
                 } else {
                     neig[0] = cull_top;
                 }
                 if in_range(k, 1, t) {
-                    neig[1] = !reg.is_voxel(&grid[below]);
+                    neig[1] = !reg.is_covering(&grid[below], Top);
                 } else {
                     neig[1] = cull_bottom;
                 }
                 if in_range(i + 1, 0, width) {
-                    neig[2] = !reg.is_voxel(&grid[right]);
+                    neig[2] = !reg.is_covering(&grid[right], Left);
                 } else {
                     neig[2] = cull_right;
                 }
                 if in_range(i, 1, t) {
-                    neig[3] = !reg.is_voxel(&grid[left]);
+                    neig[3] = !reg.is_covering(&grid[left], Right);
                 } else {
                     neig[3] = cull_left;
                 }
                 if in_range(j + 1, 0, length) {
-                    neig[4] = !reg.is_voxel(&grid[back]);
+                    neig[4] = !reg.is_covering(&grid[back], Forward);
                 } else {
                     neig[4] = cull_back;
                 }
                 if in_range(j, 1, t) {
-                    neig[5] = !reg.is_voxel(&grid[forward]);
+                    neig[5] = !reg.is_covering(&grid[forward], Back);
                 } else {
                     neig[5] = cull_forward;
                 }
@@ -125,7 +130,7 @@ pub fn mesh_grid<T>(
                     continue;
                 }
                 if in_range(cord, 0, t) {
-                    if let Some(v_mesh) = reg.get_mesh(&grid[cord]) {
+                    if let VoxelMesh::NormalCube(v_mesh) = reg.get_mesh(&grid[cord]) {
                         // add_vertices() is a private function that adds the vertices and
                         // indices to the running count of vertices and indices.
                         add_vertices(
@@ -151,8 +156,12 @@ pub fn mesh_grid<T>(
         mesh.insert_attribute(att, vals);
     }
     mesh.set_indices(Some(Indices::U32(indices)));
+    if pbs.is_some() {
+        apply_pbs(&mut mesh, &vivi, dims, 0, vivi.vivi.len(), pbs.unwrap());
+    }
     let d_mesh = MeshMD {
         dims,
+        pbs,
         vivi,
         changed_voxels: vec![],
     };

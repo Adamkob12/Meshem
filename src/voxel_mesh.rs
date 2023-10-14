@@ -11,6 +11,7 @@ pub fn generate_voxel_mesh(
     texture_atlas_dims: [u32; 2],
     texture: [(Face, [u32; 2]); 6],
     padding: f32,
+    default_color_intensity: f32,
 ) -> Mesh {
     let mut cube_mesh = Mesh::new(PrimitiveTopology::TriangleList);
     let y = voxel_dims[1] / 2.0;
@@ -126,6 +127,40 @@ pub fn generate_voxel_mesh(
             [0.0, 0.0, -1.0],
             [0.0, 0.0, -1.0],
         ],
+    );
+
+    #[rustfmt::skip]
+    cube_mesh.insert_attribute(
+        Mesh::ATTRIBUTE_COLOR,
+        vec![
+
+
+
+            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
+            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
+            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
+            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
+            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
+            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
+            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
+            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
+            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
+            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
+            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
+            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
+            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
+            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
+            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
+            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
+            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
+            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
+            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
+            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
+            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
+            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
+            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
+            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
+        ]
     );
 
     // Create the triangles out of the 24 vertices we created.

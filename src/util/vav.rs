@@ -491,6 +491,16 @@ impl VAVutils for VertexAttributeValues {
                 }
                 return to_return;
             }
+            VertexAttributeValues::Float32x4(ref vals) => {
+                let mut to_return = VertexAttributeValues::Float32x4(vec![]);
+                let VertexAttributeValues::Float32x4(ref mut values) = to_return else {
+                    panic!("This shoudln't happen.");
+                };
+                for &i in needed_values.iter() {
+                    values.push(vals[i as usize]);
+                }
+                return to_return;
+            }
             _ => panic!("This variant isn't supported"),
         }
     }

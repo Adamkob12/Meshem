@@ -25,6 +25,7 @@ fn main() {
             (Forward, [0, 0]),
         ],
         0.05,
+        0.8,
     );
     let mesh2 = generate_voxel_mesh(
         [1.0, 1.0, 1.0],
@@ -38,6 +39,7 @@ fn main() {
             (Forward, [0, 1]),
         ],
         0.05,
+        0.8,
     );
     app.insert_resource(BlockRegistry {
         grass: mesh,
@@ -109,6 +111,7 @@ fn setup(
         grid.as_slice(),
         breg.into_inner(),
         MeshingAlgorithm::Culling,
+        None,
     )
     .unwrap();
     let culled_mesh_handle: Handle<Mesh> = meshes.add(culled_mesh.clone());
@@ -214,21 +217,21 @@ impl VoxelRegistry for BlockRegistry {
     type Voxel = u16;
     /// The get_mesh function, probably the most important function in the
     /// [`VoxelRegistry`], it is what allows us to  quickly access the Mesh of each Voxel.
-    fn get_mesh(&self, voxel: &Self::Voxel) -> Option<&Mesh> {
+    fn get_mesh(&self, voxel: &Self::Voxel) -> VoxelMesh<&Mesh> {
         if *voxel == 0 {
-            return None;
+            return VoxelMesh::Null;
         }
         if *voxel == 1 {
-            return Some(&self.dirt);
+            return VoxelMesh::NormalCube(&self.dirt);
         }
         if *voxel == 2 {
-            return Some(&self.grass);
+            return VoxelMesh::NormalCube(&self.grass);
         }
-        None
+        VoxelMesh::Null
     }
     /// Important function that tells our Algorithm if the Voxel is "full", for example, the Air
     /// in minecraft is not "full", but it is still on the chunk data, to singal there is nothing.
-    fn is_voxel(&self, voxel: &u16) -> bool {
+    fn is_covering(&self, voxel: &u16, _side: Face) -> bool {
         return *voxel != 0;
     }
     /// The center of the Mesh, out mesh is defined in src/voxel_mesh.rs, just a constant.

@@ -1,14 +1,23 @@
+use crate::pbs::*;
 use crate::prelude::*;
 use bevy::render::mesh::{Indices, VertexAttributeValues};
 
 /// The function updates the mesh according to the change log in the mesh meta data.
-pub fn update_mesh<T>(
+pub fn update_mesh<T: std::fmt::Debug>(
     mesh: &mut Mesh,
     metadata: &mut MeshMD<T>,
     reg: &impl VoxelRegistry<Voxel = T>,
 ) {
+    let mut min = usize::MAX;
+    let mut max = usize::MIN;
     let voxel_dims = reg.get_voxel_dimensions();
     for (voxel, index, change, neighbors) in metadata.changed_voxels.iter() {
+        if *index < min {
+            min = *index;
+        }
+        if *index > max {
+            max = *index;
+        }
         let temp = three_d_cords(*index, metadata.dims);
         let position_offset = (
             temp.0 as f32 * voxel_dims[0],
@@ -20,9 +29,17 @@ pub fn update_mesh<T>(
             for (i, j) in neighbors.iter().enumerate() {
                 match j {
                     None => n[i] = true,
-                    Some(t) if !reg.is_voxel(&t) => n[i] = true,
+                    Some(t) if !reg.is_covering(&t, Face::from(i).opposite()) => n[i] = true,
                     Some(_) => {}
                 }
+            }
+            n
+        };
+
+        let covering: Neighbors = {
+            let mut n = [false; 6];
+            for i in 0..6 {
+                n[i] = reg.is_covering(voxel, Face::from(i));
             }
             n
         };
@@ -32,9 +49,11 @@ pub fn update_mesh<T>(
             for (i, j) in neighbors.iter().enumerate() {
                 match j {
                     None => continue,
-                    Some(t) if reg.is_voxel(&t) => {
-                        r.push((Face::from(i), reg.get_mesh(&t).unwrap()))
-                    }
+                    Some(t) if reg.is_covering(&t, Face::from(i).opposite()) => r.push((
+                        Face::from(i),
+                        reg.get_mesh(&t)
+                            .expect(format!("Expected Mesh for voxel {:?}", &t).as_str()),
+                    )),
                     _ => continue,
                 }
             }
@@ -52,7 +71,7 @@ pub fn update_mesh<T>(
                     reg.get_center(),
                     position_offset,
                 );
-                remove_quads_facing(mesh, &mut metadata.vivi, *index, metadata.dims);
+                remove_quads_facing(mesh, &mut metadata.vivi, *index, metadata.dims, covering);
             }
             VoxelChange::Broken => {
                 remove_voxel(mesh, &mut metadata.vivi, *index, [true; 6]);
@@ -68,21 +87,42 @@ pub fn update_mesh<T>(
             }
         }
     }
+
     metadata.changed_voxels.clear();
+    if metadata.pbs.is_some() {
+        apply_pbs(
+            mesh,
+            &metadata.vivi,
+            metadata.dims,
+            min.checked_sub(metadata.dims.0 * metadata.dims.2 * 2)
+                .unwrap_or(0),
+            max.checked_add(metadata.dims.0 * metadata.dims.2 * 2)
+                .unwrap_or(usize::MAX),
+            metadata.pbs.unwrap(),
+        );
+    }
 }
 
 // The function removes all quads facing a voxel.
-fn remove_quads_facing(mesh: &mut Mesh, vivi: &mut VIVI, voxel_index: usize, dims: Dimensions) {
-    let mut neig: Neighbors;
+fn remove_quads_facing(
+    mesh: &mut Mesh,
+    vivi: &mut VIVI,
+    voxel_index: usize,
+    dims: Dimensions,
+    covering: Neighbors,
+) {
+    let mut quad_to_remove: Neighbors;
     for i in 0..6 {
         let face = Face::from(i as usize);
         let n = match get_neighbor(voxel_index, face, dims) {
             None => continue,
             Some(i) => i,
         };
-        neig = [false; 6];
-        neig[face.opposite() as usize] = true;
-        remove_voxel(mesh, vivi, n, neig);
+        quad_to_remove = [false; 6];
+        quad_to_remove[face.opposite() as usize] = true;
+        if covering[face.opposite() as usize] {
+            remove_voxel(mesh, vivi, n, quad_to_remove);
+        }
     }
 }
 
