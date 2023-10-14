@@ -11,6 +11,7 @@ pub fn generate_voxel_mesh(
     texture_atlas_dims: [u32; 2],
     texture: [(Face, [u32; 2]); 6],
     padding: f32,
+    default_color_intensity: f32,
 ) -> Mesh {
     let mut cube_mesh = Mesh::new(PrimitiveTopology::TriangleList);
     let y = voxel_dims[1] / 2.0;
@@ -132,30 +133,33 @@ pub fn generate_voxel_mesh(
     cube_mesh.insert_attribute(
         Mesh::ATTRIBUTE_COLOR,
         vec![
-            [0.5, 0.5, 0.5, 1.0],
-            [0.5, 0.5, 0.5, 1.0],
-            [0.5, 0.5, 0.5, 1.0],
-            [0.5, 0.5, 0.5, 1.0],
-            [0.5, 0.5, 0.5, 1.0],
-            [0.5, 0.5, 0.5, 1.0],
-            [0.5, 0.5, 0.5, 1.0],
-            [0.5, 0.5, 0.5, 1.0],
-            [0.5, 0.5, 0.5, 1.0],
-            [0.5, 0.5, 0.5, 1.0],
-            [0.5, 0.5, 0.5, 1.0],
-            [0.5, 0.5, 0.5, 1.0],
-            [0.5, 0.5, 0.5, 1.0],
-            [0.5, 0.5, 0.5, 1.0],
-            [0.5, 0.5, 0.5, 1.0],
-            [0.5, 0.5, 0.5, 1.0],
-            [0.5, 0.5, 0.5, 1.0],
-            [0.5, 0.5, 0.5, 1.0],
-            [0.5, 0.5, 0.5, 1.0],
-            [0.5, 0.5, 0.5, 1.0],
-            [0.5, 0.5, 0.5, 1.0],
-            [0.5, 0.5, 0.5, 1.0],
-            [0.5, 0.5, 0.5, 1.0],
-            [0.5, 0.5, 0.5, 1.0],
+
+
+
+            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
+            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
+            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
+            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
+            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
+            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
+            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
+            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
+            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
+            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
+            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
+            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
+            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
+            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
+            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
+            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
+            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
+            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
+            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
+            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
+            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
+            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
+            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
+            [default_color_intensity, default_color_intensity, default_color_intensity, 1.0],
         ]
     );
 

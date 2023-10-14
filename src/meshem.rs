@@ -27,6 +27,9 @@ pub enum MeshingAlgorithm {
 ///     An example to create a [`VoxelRegistry`] is in the examples folder.
 /// - ['ma'](MeshingAlgorithm): The meshing algorithm to use - currently supports Culling and
 ///     Naive. (Culling is always better than Naive)
+/// - ['pbs']: Enable Proximity Based Shadowing (Some ..) or not (None). PBS is a technique often used in
+///     voxel based games that applies a shadow to the sides of a voxel depending on how many
+///     voxels are in the proximity.
 ///
 /// Return:
 /// - [`Some(mesh)`](Mesh): the mesh
@@ -37,6 +40,7 @@ pub fn mesh_grid<T>(
     grid: &[T],
     reg: &impl VoxelRegistry<Voxel = T>,
     ma: MeshingAlgorithm,
+    pbs: Option<PbsParameters>,
 ) -> Option<(Mesh, MeshMD<T>)> {
     let mut mesh = Mesh::new(PrimitiveTopology::TriangleList);
     let ch_len = grid.len();
@@ -152,9 +156,12 @@ pub fn mesh_grid<T>(
         mesh.insert_attribute(att, vals);
     }
     mesh.set_indices(Some(Indices::U32(indices)));
-    apply_pbs(&mut mesh, &vivi, dims);
+    if pbs.is_some() {
+        apply_pbs(&mut mesh, &vivi, dims, 0, vivi.vivi.len(), pbs.unwrap());
+    }
     let d_mesh = MeshMD {
         dims,
+        pbs,
         vivi,
         changed_voxels: vec![],
     };

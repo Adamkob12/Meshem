@@ -1,5 +1,5 @@
 #![allow(dead_code, unused_imports)]
-pub mod face;
+pub(crate) mod face;
 pub(crate) mod mesh_metadata;
 pub(crate) mod meshem;
 pub(crate) mod pbs;
@@ -15,6 +15,7 @@ pub mod prelude {
     pub use crate::face::*;
     pub use crate::mesh_metadata::*;
     pub use crate::meshem::*;
+    pub use crate::pbs::*;
     pub use crate::update::*;
     pub use crate::util::compressed_voxel_grid::*;
     pub use crate::util::vav::*;

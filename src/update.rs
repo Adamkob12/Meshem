@@ -1,3 +1,4 @@
+use crate::pbs::*;
 use crate::prelude::*;
 use bevy::render::mesh::{Indices, VertexAttributeValues};
 
@@ -7,8 +8,16 @@ pub fn update_mesh<T: std::fmt::Debug>(
     metadata: &mut MeshMD<T>,
     reg: &impl VoxelRegistry<Voxel = T>,
 ) {
+    let mut min = usize::MAX;
+    let mut max = usize::MIN;
     let voxel_dims = reg.get_voxel_dimensions();
     for (voxel, index, change, neighbors) in metadata.changed_voxels.iter() {
+        if *index < min {
+            min = *index;
+        }
+        if *index > max {
+            max = *index;
+        }
         let temp = three_d_cords(*index, metadata.dims);
         let position_offset = (
             temp.0 as f32 * voxel_dims[0],
@@ -78,7 +87,20 @@ pub fn update_mesh<T: std::fmt::Debug>(
             }
         }
     }
+
     metadata.changed_voxels.clear();
+    if metadata.pbs.is_some() {
+        apply_pbs(
+            mesh,
+            &metadata.vivi,
+            metadata.dims,
+            min.checked_sub(metadata.dims.0 * metadata.dims.2 * 2)
+                .unwrap_or(0),
+            max.checked_add(metadata.dims.0 * metadata.dims.2 * 2)
+                .unwrap_or(usize::MAX),
+            metadata.pbs.unwrap(),
+        );
+    }
 }
 
 // The function removes all quads facing a voxel.

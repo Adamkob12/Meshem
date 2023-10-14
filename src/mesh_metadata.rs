@@ -85,7 +85,7 @@ pub enum VoxelChange {
 /// T is the voxel type, it needs to be the same as the voxel registry.
 pub struct MeshMD<T> {
     pub(crate) vivi: VIVI,
-    // The grid dimensions
+    pub(crate) pbs: Option<PbsParameters>,
     /// The dimensions of the 3d grid.
     pub dims: Dimensions,
     // T: the voxel type,
