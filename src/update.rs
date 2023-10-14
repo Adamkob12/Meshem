@@ -49,11 +49,17 @@ pub fn update_mesh<T: std::fmt::Debug>(
             for (i, j) in neighbors.iter().enumerate() {
                 match j {
                     None => continue,
-                    Some(t) if reg.is_covering(&t, Face::from(i).opposite()) => r.push((
-                        Face::from(i),
-                        reg.get_mesh(&t)
-                            .expect(format!("Expected Mesh for voxel {:?}", &t).as_str()),
-                    )),
+                    Some(t)
+                        if /* reg.is_covering(&t, Face::from(i).opposite()) && */
+                            reg.is_covering(voxel, Face::from(i)) =>
+                    {
+                        if let VoxelMesh::NormalCube(mesh) = reg.get_mesh(&t) {
+                            r.push((
+                                Face::from(i),
+                                mesh,
+                            ));
+                        }
+                    }
                     _ => continue,
                 }
             }
