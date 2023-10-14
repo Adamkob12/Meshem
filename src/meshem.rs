@@ -1,4 +1,5 @@
 //! This module contains the main functions themself, and some added utilities and defs.
+use crate::pbs::*;
 use crate::prelude::*;
 use bevy::prelude::*;
 use bevy::render::mesh::{Indices, MeshVertexAttribute, VertexAttributeValues};
@@ -151,6 +152,7 @@ pub fn mesh_grid<T>(
         mesh.insert_attribute(att, vals);
     }
     mesh.set_indices(Some(Indices::U32(indices)));
+    apply_pbs(&mut mesh, &vivi, dims);
     let d_mesh = MeshMD {
         dims,
         vivi,

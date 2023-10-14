@@ -10,6 +10,7 @@ pub enum Face {
 }
 
 pub(crate) const OFFSET_CONST: u32 = 0b0001_1111_1111_1111_1111_1111_1111_1111;
+pub(crate) const REVERSE_OFFSET_CONST: u32 = 0b1110_0000_0000_0000_0000_0000_0000_0000;
 
 /// Funtion converts a `Face` into an its encoded representation for opcode.
 pub fn face_to_u32(f: Face) -> u32 {
@@ -26,6 +27,24 @@ pub fn face_to_u32(f: Face) -> u32 {
         Face::Back => 536_870_912,
         // 000 -> 0
         Face::Forward => 0,
+    }
+}
+
+pub fn face_from_u32(u: u32) -> Face {
+    match u {
+        2_684_354_560 => Face::Top,
+        // 100 -> 2^31
+        2_147_483_648 => Face::Bottom,
+        // 011 -> 2^30 + 2^29
+        1_610_612_736 => Face::Right,
+        // 010 -> 2^30
+        1_073_741_824 => Face::Left,
+        // 001 -> 2^29
+        536_870_912 => Face::Back,
+        // 000 -> 0
+        0 => Face::Forward,
+
+        _ => panic!("Can't convert u32 to Face"),
     }
 }
 

@@ -2,10 +2,12 @@
 pub mod face;
 pub(crate) mod mesh_metadata;
 pub(crate) mod meshem;
+pub(crate) mod pbs;
 pub(crate) mod update;
 pub(crate) mod util;
 pub(crate) mod voxel_mesh;
 
+use bevy::log::warn;
 use bevy::render::mesh::{Mesh, MeshVertexAttribute};
 
 pub mod prelude {
@@ -52,7 +54,10 @@ impl<T> VoxelMesh<T> {
     pub fn unwrap(self) -> T {
         match self {
             Self::NormalCube(t) => t,
-            Self::CustomMesh(t) => t,
+            Self::CustomMesh(t) => {
+                warn!("Custom Meshes are still not properly implemented!");
+                t
+            }
             Self::Null => panic!(),
         }
     }
@@ -60,7 +65,10 @@ impl<T> VoxelMesh<T> {
     pub fn expect(self, msg: &str) -> T {
         match self {
             Self::NormalCube(t) => t,
-            Self::CustomMesh(t) => t,
+            Self::CustomMesh(t) => {
+                warn!("Custom Meshes are still not properly implemented!");
+                t
+            }
             Self::Null => panic!("{}", msg),
         }
     }

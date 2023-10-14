@@ -6,7 +6,7 @@ use bevy::utils::hashbrown::HashMap;
 // each element of the field is a vector of its quads (a quad is 2 triangles (indices) made out of
 // 4 vertices to create a square, which )
 pub(crate) struct VIVI {
-    vivi: Vec<Vec<u32>>,
+    pub(crate) vivi: Vec<Vec<u32>>,
     pub(crate) map: HashMap<u32, u32>,
 }
 
