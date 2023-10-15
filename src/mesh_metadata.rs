@@ -80,6 +80,7 @@ pub enum VoxelChange {
     Broken,
     Added,
     CullFaces,
+    AddFaces,
 }
 
 /// Mesh meta-data struct.

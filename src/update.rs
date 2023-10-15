@@ -104,6 +104,17 @@ pub fn update_mesh<T: std::fmt::Debug>(
                         .unwrap(),
                 );
             }
+            VoxelChange::AddFaces => {
+                add_voxel_after_gen(
+                    neig,
+                    mesh,
+                    reg.get_mesh(voxel).unwrap(),
+                    &mut metadata.vivi,
+                    *index,
+                    reg.get_center(),
+                    position_offset,
+                );
+            }
         }
     }
 
