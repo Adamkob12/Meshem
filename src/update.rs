@@ -24,16 +24,24 @@ pub fn update_mesh<T: std::fmt::Debug>(
             temp.2 as f32 * voxel_dims[1],
             temp.1 as f32 * voxel_dims[2],
         );
-        let neig: Neighbors = {
-            let mut n = [false; 6];
-            for (i, j) in neighbors.iter().enumerate() {
-                match j {
-                    None => n[i] = true,
-                    Some(t) if !reg.is_covering(&t, Face::from(i).opposite()) => n[i] = true,
-                    Some(_) => {}
+        let neig: Neighbors = match change {
+            VoxelChange::AddFaces => neighbors
+                .iter()
+                .map(|x| x.is_some())
+                .collect::<Vec<bool>>()
+                .try_into()
+                .unwrap(),
+            _ => {
+                let mut n = [false; 6];
+                for (i, j) in neighbors.iter().enumerate() {
+                    match j {
+                        None => n[i] = true,
+                        Some(t) if !reg.is_covering(&t, Face::from(i).opposite()) => n[i] = true,
+                        Some(_) => {}
+                    }
                 }
+                n
             }
-            n
         };
 
         let covering: Neighbors = {
