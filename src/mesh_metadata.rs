@@ -79,6 +79,7 @@ impl VIVI {
 pub enum VoxelChange {
     Broken,
     Added,
+    CullFaces,
 }
 
 /// Mesh meta-data struct.

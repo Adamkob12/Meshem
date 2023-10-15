@@ -91,6 +91,19 @@ pub fn update_mesh<T: std::fmt::Debug>(
                     metadata.dims,
                 );
             }
+            VoxelChange::CullFaces => {
+                remove_voxel(
+                    mesh,
+                    &mut metadata.vivi,
+                    *index,
+                    neighbors
+                        .iter()
+                        .map(|x| x.is_some())
+                        .collect::<Vec<bool>>()
+                        .try_into()
+                        .unwrap(),
+                );
+            }
         }
     }
 
