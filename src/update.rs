@@ -248,6 +248,14 @@ fn add_voxel_after_gen(
     center: [f32; 3],
     position_offset: (f32, f32, f32),
 ) {
+    // Make sure we are not adding quads that already exist
+    let mut neig = neig;
+    for (i, b) in neig.iter_mut().enumerate() {
+        let face = Face::from(i);
+        if *b && vivi.get_quad_index(face, voxel_index).is_some() {
+            *b = false;
+        }
+    }
     let vertices_count = main_mesh.count_vertices();
     let Indices::U32(ref mut indices_main) = main_mesh.indices_mut()
         .expect("Couldn't get indices data")
