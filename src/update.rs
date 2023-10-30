@@ -21,8 +21,8 @@ pub fn update_mesh<T: std::fmt::Debug>(
         let temp = three_d_cords(*index, metadata.dims);
         let position_offset = (
             temp.0 as f32 * voxel_dims[0],
-            temp.2 as f32 * voxel_dims[1],
-            temp.1 as f32 * voxel_dims[2],
+            temp.1 as f32 * voxel_dims[1],
+            temp.2 as f32 * voxel_dims[2],
         );
         let neig: Neighbors = match change {
             VoxelChange::AddFaces => neighbors
@@ -137,6 +137,7 @@ pub fn update_mesh<T: std::fmt::Debug>(
             max.checked_add(metadata.dims.0 * metadata.dims.2 * 2)
                 .unwrap_or(usize::MAX),
             metadata.pbs.unwrap(),
+            reg.get_voxel_dimensions(),
         );
     }
 }
@@ -200,8 +201,7 @@ fn remove_voxel(mesh: &mut Mesh, vivi: &mut VIVI, voxel_index: usize, neig: Neig
             vivi.change_quad_index(ver_count, quad);
         }
 
-        let Indices::U32(indices) = mesh.indices_mut()
-            .expect("couldn't get indices data") else {
+        let Indices::U32(indices) = mesh.indices_mut().expect("couldn't get indices data") else {
             panic!("Expected U32 indices format");
         };
         for _ in 0..6 {
@@ -231,8 +231,8 @@ pub(crate) fn add_quads_facing(
         let temp = three_d_cords(i, dims);
         let position_offset = (
             temp.0 as f32 * voxel_dims[0],
-            temp.2 as f32 * voxel_dims[1],
-            temp.1 as f32 * voxel_dims[2],
+            temp.1 as f32 * voxel_dims[1],
+            temp.2 as f32 * voxel_dims[2],
         );
         add_voxel_after_gen(neig, mesh, vmesh, vivi, i, center, position_offset)
     }
@@ -257,10 +257,10 @@ fn add_voxel_after_gen(
         }
     }
     let vertices_count = main_mesh.count_vertices();
-    let Indices::U32(ref mut indices_main) = main_mesh.indices_mut()
-        .expect("Couldn't get indices data")
-        else {
-            panic!("Indices format should be U32");
+    let Indices::U32(ref mut indices_main) =
+        main_mesh.indices_mut().expect("Couldn't get indices data")
+    else {
+        panic!("Indices format should be U32");
     };
 
     let pos_attribute = voxel
@@ -269,8 +269,7 @@ fn add_voxel_after_gen(
     let VertexAttributeValues::Float32x3(positions) = pos_attribute else {
         panic!("Unexpected vertex format for position attribute, expected Float32x3.");
     };
-    let Indices::U32(indices) = voxel.indices()
-        .expect("couldn't get indices data") else {
+    let Indices::U32(indices) = voxel.indices().expect("couldn't get indices data") else {
         panic!("Expected U32 indices format");
     };
     let triangles = indices

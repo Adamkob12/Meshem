@@ -157,7 +157,15 @@ pub fn mesh_grid<T>(
     }
     mesh.set_indices(Some(Indices::U32(indices)));
     if pbs.is_some() {
-        apply_pbs(&mut mesh, &vivi, dims, 0, vivi.vivi.len(), pbs.unwrap());
+        apply_pbs(
+            &mut mesh,
+            &vivi,
+            dims,
+            0,
+            vivi.vivi.len(),
+            pbs.unwrap(),
+            reg.get_voxel_dimensions(),
+        );
     }
     let d_mesh = MeshMD {
         dims,
@@ -190,8 +198,7 @@ fn add_vertices(
     let VertexAttributeValues::Float32x3(positions) = pos_attribute else {
         panic!("Unexpected vertex format for position attribute, expected Float32x3.");
     };
-    let Indices::U32(indices) = voxel.indices()
-        .expect("couldn't get indices data") else {
+    let Indices::U32(indices) = voxel.indices().expect("couldn't get indices data") else {
         panic!("Expected U32 indices format");
     };
     let triangles = indices

@@ -1,4 +1,4 @@
-#![allow(dead_code, unused_imports)]
+pub(crate) mod adj;
 pub(crate) mod face;
 pub(crate) mod mesh_metadata;
 pub(crate) mod meshem;
@@ -11,14 +11,15 @@ use bevy::log::warn;
 use bevy::render::mesh::{Mesh, MeshVertexAttribute};
 
 pub mod prelude {
+    pub use crate::adj::*;
     pub use crate::face::Face::*;
     pub use crate::face::*;
     pub use crate::mesh_metadata::*;
     pub use crate::meshem::*;
     pub use crate::pbs::*;
     pub use crate::update::*;
-    pub use crate::util::compressed_voxel_grid::*;
-    pub use crate::util::vav::*;
+    pub(crate) use crate::util::compressed_voxel_grid::*;
+    pub(crate) use crate::util::vav::*;
     pub use crate::util::*;
     pub use crate::voxel_mesh::*;
     pub use crate::VoxelRegistry;
@@ -28,7 +29,7 @@ pub mod prelude {
 /// Implementing this trait for your own data-structure is the most important
 /// prerequesite if you want to use the function.
 pub trait VoxelRegistry {
-    type Voxel: std::fmt::Debug + Eq + PartialEq;
+    type Voxel: std::fmt::Debug + Eq + PartialEq + Sized + Clone + Copy;
     /// Returns None if the mesh is "irrelevant" as in it's air or not a Voxel.
     fn get_mesh(&self, voxel: &Self::Voxel) -> VoxelMesh<&Mesh>;
     /// Would this voxel cover the voxel that's located on it's `side`? for example, an air block
