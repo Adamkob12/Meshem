@@ -32,8 +32,9 @@ pub enum MeshingAlgorithm {
 ///     voxels are in the proximity.
 ///
 /// Return:
-/// - [`Some(mesh)`](Mesh): the mesh
-/// - [`None`]: couldn't create mesh
+/// - The first mesh is the mesh of the full, normal cube voxels. (for example, the stone blocks)
+/// - MeshMD<T> is the mesh metadata that the user needs to keep if they want to update the mesh.
+/// - None: Couldn't generate the mesh
 pub fn mesh_grid<T>(
     dims: Dimensions,
     outer_layer: &[Face],
@@ -131,9 +132,9 @@ pub fn mesh_grid<T>(
                 }
                 if in_range(cord, 0, t) {
                     if let VoxelMesh::NormalCube(v_mesh) = reg.get_mesh(&grid[cord]) {
-                        // add_vertices() is a private function that adds the vertices and
+                        // add_vertices_normal_cube() is a private function that adds the vertices and
                         // indices to the running count of vertices and indices.
-                        add_vertices(
+                        add_vertices_normal_cube(
                             neig,
                             &mut indices,
                             &mut vertices,
@@ -181,7 +182,7 @@ pub fn mesh_grid<T>(
 /// and indices, preserving their attributes, and (important!) assigning a custom offset to the
 /// position attributes, we are assuming this is only needed for the position attributes (because
 /// it usually is).
-fn add_vertices(
+fn add_vertices_normal_cube(
     neig: Neighbors,
     indices_main: &mut Vec<u32>,
     vertices: &mut Vec<(MeshVertexAttribute, VertexAttributeValues)>,

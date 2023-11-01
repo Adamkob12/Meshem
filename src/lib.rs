@@ -60,7 +60,7 @@ impl<T> VoxelMesh<T> {
                 warn!("Custom Meshes are still not properly implemented!");
                 t
             }
-            Self::Null => panic!(),
+            Self::Null => panic!("Tried unwrapping a Null VoxelMesh type."),
         }
     }
 
