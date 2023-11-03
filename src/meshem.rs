@@ -61,8 +61,8 @@ pub fn mesh_grid<T>(
         r
     };
     let width = dims.0;
-    let length = dims.1;
-    let height = dims.2;
+    let length = dims.2;
+    let height = dims.1;
     let t = width * length * height;
     let mut rle_bool_voxel = RleVec::new();
 

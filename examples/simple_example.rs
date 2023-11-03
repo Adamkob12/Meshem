@@ -323,7 +323,7 @@ fn regenerate_mesh(
             .get_mut(mesh_query.get_single().unwrap())
             .expect("Couldn't get a mut ref to the mesh");
         let grid: Vec<u16> = vec![1; FACTOR * FACTOR * FACTOR];
-        let dims: Dimensions = (FACTOR, FACTOR, FACTOR);
+        let dims: Dimensions = (FACTOR / 2, FACTOR * 2, FACTOR);
 
         let m = meshy.get_single_mut().unwrap().into_inner();
         let t = text_query.get_single_mut().unwrap().into_inner();
