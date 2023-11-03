@@ -12,7 +12,7 @@ use bevy::prelude::Vec3;
 
 pub fn position_to_chunk(pos: Vec3, chunk_dims: (usize, usize, usize)) -> [i32; 2] {
     let chunk_width = chunk_dims.0;
-    let chunk_length = chunk_dims.1;
+    let chunk_length = chunk_dims.2;
     let x = pos.x + 0.5;
     let z = pos.z + 0.5;
     [
