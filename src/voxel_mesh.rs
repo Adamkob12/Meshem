@@ -10,14 +10,15 @@ pub fn generate_voxel_mesh(
     voxel_dims: [f32; 3],
     texture_atlas_dims: [u32; 2],
     texture: [(Face, [u32; 2]); 6],
+    voxel_center: [f32; 3],
     padding: f32,
     default_color_intensity: Option<f32>,
     alpha: f32,
 ) -> Mesh {
     let mut cube_mesh = Mesh::new(PrimitiveTopology::TriangleList);
-    let y = voxel_dims[1] / 2.0;
-    let x = voxel_dims[0] / 2.0;
-    let z = voxel_dims[2] / 2.0;
+    let y = voxel_dims[1] / 2.0 + voxel_center[1];
+    let x = voxel_dims[0] / 2.0 + voxel_center[0];
+    let z = voxel_dims[2] / 2.0 + voxel_center[2];
 
     let u: f32 = 1.0 / (texture_atlas_dims[0] as f32);
     let v: f32 = 1.0 / (texture_atlas_dims[1] as f32);
