@@ -196,7 +196,7 @@ impl VoxelRegistry for BlockRegistry {
     }
     /// The center of the Mesh, out mesh is defined in src/default_block.rs, just a constant.
     fn get_center(&self) -> [f32; 3] {
-        return [0.0, 0.0, 0.0];
+        return [0.5, 0.5, 0.5];
     }
     /// The dimensions of the Mesh, out mesh is defined in src/default_block.rs, just a constant.
     fn get_voxel_dimensions(&self) -> [f32; 3] {

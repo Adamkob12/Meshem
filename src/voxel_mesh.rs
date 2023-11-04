@@ -17,11 +17,11 @@ pub fn generate_voxel_mesh(
 ) -> Mesh {
     let mut cube_mesh = Mesh::new(PrimitiveTopology::TriangleList);
     let y = voxel_dims[1] / 2.0 + voxel_center[1];
-    let ny = voxel_dims[1] / 2.0 - voxel_center[1];
+    let ny = y - voxel_dims[1];
     let x = voxel_dims[0] / 2.0 + voxel_center[0];
-    let nx = voxel_dims[0] / 2.0 - voxel_center[0];
+    let nx = x - voxel_dims[0];
     let z = voxel_dims[2] / 2.0 + voxel_center[2];
-    let nz = voxel_dims[2] / 2.0 - voxel_center[2];
+    let nz = z - voxel_dims[2];
 
     let u: f32 = 1.0 / (texture_atlas_dims[0] as f32);
     let v: f32 = 1.0 / (texture_atlas_dims[1] as f32);
