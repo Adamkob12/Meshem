@@ -8,7 +8,8 @@ pub(crate) mod util;
 pub(crate) mod voxel_mesh;
 
 use bevy::log::warn;
-use bevy::render::mesh::{Mesh, MeshVertexAttribute};
+use bevy::prelude::*;
+use bevy::render::mesh::MeshVertexAttribute;
 
 pub mod prelude {
     pub use crate::adj::*;
