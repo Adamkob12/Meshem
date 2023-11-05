@@ -1,8 +1,6 @@
 # Bevy Meshem
 ## ***Showcase (taken from [minecraft_bevy](https://github.com/Adamkob12/minecraft_bevy)):***
-![ezgif com-resize](https://github.com/Adamkob12/bevy_meshem/assets/46227443/a28e2de7-8e42-47fa-b02f-ac9e2b343f29)
-
-(The choppiness is from the loss compression I had to use to get the gif under 10MB)
+![Screenshot 2023-11-05 at 16 41 53](https://github.com/Adamkob12/bevy_meshem/assets/46227443/58afd45b-ea66-4b77-a3b1-d00627bd27a5)
 
 Bevy Compatibility:
 
@@ -22,6 +20,12 @@ Just define a data structure that implements the simple "VoxelRegistry" trait (s
 ### ___Run time mesh updating in O(1):___
 Added in 0.2, this features allows users to easily update the mesh after it has been generated, without any need for regenerating. See the new update_mesh_example.
 ![update mesh video](assets/Screenshots/video1.gif)
+### ___Custom Shadowing, Similar to "Ambient Occlusion" (PBS)___
+Added in 0.3, this feature allowes users to add an ambient occlusion-like effect during mesh generation, "proximity based shadowing":
+![Screenshot 2023-11-05 at 16 36 06](https://github.com/Adamkob12/bevy_meshem/assets/46227443/6bc24f3e-d223-4cab-8128-33a3fb9f1bd8)
+### ___"Introducing" Chunks___
+When generating each mesh, the unused vertices inside the mesh are being culled, but there was no way to automatically cull vertices trapped between two seperatly generated meshes, only manually.
+Now `introduce_adjacent_chunks` will automatically do the job for you, and apply the shadowing mentioned above as well!
 ### "The Naive Method"
 Iterate over the grid and generate a matching cube for each voxel (Also reffered to as the "default" as this method doesn't offer any optimization) examples: (screenshots from examples/simple_example.rs)
 ![Naive method screenshot](assets/Screenshots/ScreenshotS.png)
