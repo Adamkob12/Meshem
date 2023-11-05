@@ -8,8 +8,9 @@ Bevy Compatibility:
 
 | Bevy Version |  bevy_meshem         |
 |--------------|----------------------|
-| `0.11`       | `0.2.x`
-| `0.11`       | `0.1.1`               |
+| `0.12`       | `0.3.x`              |
+| `0.11.x`     | `0.2.x`              |
+| `0.11`       | `0.1.1`              |
 
 Bevy Meshem is a Rust crate designed to provide meshing algorithms for voxel grids, enabling you to create cohesive 3D mesh structures from a grid of cubic voxels.
 Similar to the mechanics in Minecraft, Bevy Meshem offers a powerful and flexible way to visualize voxel-based environments with efficient mesh generation.
@@ -42,7 +43,7 @@ Greedy Meshing is even more effecient than Culling, but it makes very limiting c
 - You know the drill - add this incantation to your project's Cargo.toml file:
   ```toml
   [dependencies]
-  bevy_meshem = "0.2.5"
+  bevy_meshem = "0.3"
   ```
 
 ## Usage
@@ -55,7 +56,6 @@ The example in examples/simple_example.rs shows what you need to do to get start
 ***In 0.2, you can also log voxel changes in the MeshMD data-structure, and use the MeshMD data-structure to update the Mesh at run-time***
 
 <img width="615" alt="Screenshot 2023-09-28 at 22 05 47" src="https://github.com/Adamkob12/bevy_meshem/assets/46227443/bc8459ad-d6ea-4eef-8677-c2b7688db1e9">
-
 
 ## Design Goals
 Flexibillity, Stabillity, User experience and Performance.

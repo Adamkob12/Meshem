@@ -1,8 +1,8 @@
 [package]
 name = "bevy_meshem"
-version = "0.2.5"
+version = "0.3.0"
 edition = "2021"
-authors = ["Adam Kobzan <kobzan.adam@gmail.com>"]
+authors = ["Adamkob12"]
 description = "A crate that offers a flexible and efficient way to generate meshes from a grid of Voxels"
 license = "MIT"
 repository = "https://github.com/Adamkob12/bevy_meshem"
@@ -11,5 +11,5 @@ documentation = "https://docs.rs/bevy_meshem"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-bevy = "0.11.0"
+bevy = "0.12.0"
 rand = "0.8.5"

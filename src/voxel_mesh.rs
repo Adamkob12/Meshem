@@ -82,13 +82,13 @@ pub fn generate_voxel_mesh(
             uvs[0], [uvs[0][0] + u - padding_u * 2.0, uvs[0][1]], [uvs[0][0] + u - padding_u * 2.0, uvs[0][1] + v - padding_v * 2.0], [uvs[0][0], uvs[0][1] + v - padding_v * 2.0],           
             // Assigning the UV coords for the bottom side
             [uvs[1][0] + u - padding_u * 2.0, uvs[1][1] + v - padding_v * 2.0], [uvs[1][0], uvs[1][1] + v - padding_v * 2.0], uvs[1], [uvs[1][0] + u - padding_u * 2.0, uvs[1][1]], 
-            // Assigning the UV coords for the top side.
+            // Assigning the UV coords for the right side.
             uvs[2], [uvs[2][0] + u - padding_u * 2.0, uvs[2][1]], [uvs[2][0] + u - padding_u * 2.0, uvs[2][1] + v - padding_v * 2.0], [uvs[2][0], uvs[2][1] + v - padding_v * 2.0],           
-            // Assigning the UV coords for the bottom side
+            // Assigning the UV coords for the left side
             [uvs[3][0] + u - padding_u * 2.0, uvs[3][1] + v - padding_v * 2.0], [uvs[3][0], uvs[3][1] + v - padding_v * 2.0], uvs[3], [uvs[3][0] + u - padding_u * 2.0, uvs[3][1]], 
-            // Assigning the UV coords for the top side.
+            // Assigning the UV coords for the back side.
             uvs[4], [uvs[4][0] + u - padding_u * 2.0, uvs[4][1]], [uvs[4][0] + u - padding_u * 2.0, uvs[4][1] + v - padding_v * 2.0], [uvs[4][0], uvs[4][1] + v - padding_v * 2.0],           
-            // Assigning the UV coords for the bottom side
+            // Assigning the UV coords for the forward side
             [uvs[5][0] + u - padding_u * 2.0, uvs[5][1] + v - padding_v * 2.0], [uvs[5][0], uvs[5][1] + v - padding_v * 2.0], uvs[5], [uvs[5][0] + u - padding_u * 2.0, uvs[5][1]], 
         ],
     );

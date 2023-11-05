@@ -72,6 +72,8 @@ pub fn mesh_grid<T>(
         vertices.push((att.clone(), VertexAttributeValues::new(att.format.clone())));
     }
 
+    let voxel_dims = reg.get_voxel_dimensions();
+    let center = reg.get_center();
     for k in 0..height {
         for j in 0..length {
             for i in 0..width {
@@ -83,8 +85,6 @@ pub fn mesh_grid<T>(
                 let back = cord + width;
                 let forward = cord.checked_sub(width).unwrap_or(usize::MAX);
                 let mut neig = [false; 6];
-                let center = reg.get_center();
-                let voxel_dims = reg.get_voxel_dimensions();
                 let position_offset = (
                     i as f32 * voxel_dims[0],
                     k as f32 * voxel_dims[1],

@@ -302,7 +302,7 @@ fn toggle_wireframe(
     without: Query<Entity, (Without<Wireframe>, With<Meshy>)>,
     mut events: EventReader<ToggleWireframe>,
 ) {
-    for _ in events.iter() {
+    for _ in events.read() {
         if let Ok(ent) = with.get_single() {
             commands.entity(ent).remove::<Wireframe>();
             for (_, material) in materials.iter_mut() {
@@ -362,7 +362,7 @@ fn mesh_update(
     mesh_query: Query<&Handle<Mesh>>,
     mut event_reader: EventReader<RegenerateMesh>,
 ) {
-    for _ in event_reader.iter() {
+    for _ in event_reader.read() {
         let mesh = meshes
             .get_mut(mesh_query.get_single().unwrap())
             .expect("Couldn't get a mut ref to the mesh");
