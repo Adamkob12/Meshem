@@ -122,10 +122,10 @@ pub(crate) fn apply_pbs(
             let face = face_from_u32(q & REVERSE_OFFSET_CONST);
             let mut count = 0;
             if let Some(neigbhor) = get_neighbor(i, face, dims) {
-                for i in 0..6 {
-                    if let Some(tmp) = get_neighbor(neigbhor, Face::from(i), dims) {
+                for j in 0..6 {
+                    if let Some(tmp) = get_neighbor(neigbhor, Face::from(j), dims) {
                         if !vivi.vivi[tmp].is_empty() {
-                            close_voxels[i] = true;
+                            close_voxels[j] = true;
                             count += 1;
                         }
                     }

@@ -119,45 +119,35 @@ pub fn extract_indices_data(mesh: &Mesh) -> Vec<[u32; 3]> {
 }
 
 pub fn iter_faces_of_chunk(dims: Dimensions, face: Face) -> impl Iterator<Item = usize> {
-    let all = 0..(dims.0 * dims.1 * dims.2);
-    let m = [dims.1 - 1, 0, dims.0 - 1, 0, dims.2 - 1, 0];
-    let i = match face {
-        Top | Bottom => 1,
-        Right | Left => 0,
-        Forward | Back => 2,
-    };
-    let all = all.filter(move |x| three_d_cords_arr(*x, dims)[i] == m[face as usize]);
-    all
+    (0..(dims.0 * dims.1 * dims.2))
+        .into_iter()
+        .filter(move |x| is_block_on_edge(dims, *x, face))
 }
 
-pub fn is_block_on_edge(dims: Dimensions, index: usize) -> Vec<Face> {
+pub fn block_edges(dims: Dimensions, index: usize) -> Vec<Face> {
     let mut to_return = vec![];
-    let m = [dims.1 - 1, 0, dims.0 - 1, 0, dims.2 - 1, 0];
     for i in 0..6 {
         let face = Face::from(i);
-        let j = match face {
-            Top | Bottom => 1,
-            Right | Left => 0,
-            Forward | Back => 2,
-        };
-        if three_d_cords_arr(index, dims)[j] == m[face as usize] {
+        if get_neighbor(index, face, dims).is_none() {
             to_return.push(face);
         }
     }
     to_return
 }
 
+pub fn is_block_on_edge(dims: Dimensions, index: usize, face: Face) -> bool {
+    get_neighbor(index, face, dims).is_none()
+}
+
 pub fn get_neigbhor_across_chunk(dims: Dimensions, index: usize, face: Face) -> usize {
-    for f in is_block_on_edge(dims, index) {
-        if f as usize == face as usize {
-            return match face {
-                Right => index - dims.0 + 1,
-                Left => index + dims.0 - 1,
-                Back => index - dims.0 * (dims.2 - 1),
-                Forward => index + dims.0 * (dims.2 - 1),
-                _ => panic!("Shouldn't happen"),
-            };
-        }
+    if is_block_on_edge(dims, index, face) {
+        return match face {
+            Right => index - dims.0 + 1,
+            Left => index + dims.0 - 1,
+            Back => index - dims.0 * (dims.2 - 1),
+            Forward => index + dims.0 * (dims.2 - 1),
+            _ => panic!("Shouldn't happen"),
+        };
     }
     panic!("`get_neigbhor_across_chunk` was called on a block that wasn't on the edge of a chunk");
 }
@@ -180,7 +170,7 @@ pub fn get_neighbor(voxel: usize, face: Face, dims: Dimensions) -> Option<usize>
 }
 
 pub fn get_neigbhors_from_across_chunks(dims: Dimensions, index: usize) -> Vec<(Face, usize)> {
-    let edges = is_block_on_edge(dims, index);
+    let edges = block_edges(dims, index);
     if edges.is_empty() {
         return vec![];
     }

@@ -1,4 +1,4 @@
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 /// This enum represents all the faces of a cubic voxel.
 pub enum Face {
     Top,
