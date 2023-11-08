@@ -4,6 +4,7 @@
 use crate::prelude::*;
 use bevy::math::Vec3;
 use bevy::render::mesh::{Mesh, VertexAttributeValues};
+use std::sync::{Arc, RwLock};
 
 #[derive(Copy, Clone)]
 /// Parameters for Proximity Based Shadowing
@@ -142,6 +143,97 @@ pub(crate) fn apply_pbs(
                     voxel_dims,
                     dims,
                 );
+            }
+        }
+    }
+}
+
+pub fn apply_pbs_with_connected_chunks<T, const N: usize>(
+    reg: &impl VoxelRegistry<Voxel = T>,
+    mesh: &mut Mesh,
+    metadata: &MeshMD<T>,
+    dims: Dimensions,
+    lower_bound: usize,
+    upper_bound: usize,
+    this_chunk: &[T],
+    north_chunk: Option<&Arc<RwLock<[T; N]>>>,
+    south_chunk: Option<&Arc<RwLock<[T; N]>>>,
+    east_chunk: Option<&Arc<RwLock<[T; N]>>>,
+    west_chunk: Option<&Arc<RwLock<[T; N]>>>,
+) {
+    if let Some(pbs_value) = metadata.pbs {
+        for (index, quads) in metadata.vivi.vivi.iter().enumerate().skip(lower_bound) {
+            if index > upper_bound {
+                break;
+            }
+            for q in quads {
+                let mut close_voxels: Neighbors = [false; 6];
+                let face = face_from_u32(q & REVERSE_OFFSET_CONST);
+                let mut count = 0;
+                if let Some(neigbhor) = get_neighbor(index, face, dims) {
+                    for j in 0..6 {
+                        let tmp_face = Face::from(j);
+                        if let Some(tmp) = get_neighbor(neigbhor, tmp_face, dims) {
+                            let voxel = &this_chunk[tmp];
+                            if reg.is_covering(voxel, tmp_face.opposite()) {
+                                close_voxels[j] = true;
+                                count += 1;
+                            }
+                        } else if let Some(neighboring_chunk) = match tmp_face {
+                            Back => north_chunk,
+                            Forward => south_chunk,
+                            Right => east_chunk,
+                            Left => west_chunk,
+                            _ => continue,
+                        } {
+                            let tmp = get_neigbhor_across_chunk(dims, neigbhor, tmp_face);
+                            let voxel = &neighboring_chunk.read().expect("g")[tmp];
+                            if reg.is_covering(voxel, tmp_face.opposite()) {
+                                close_voxels[j] = true;
+                                count += 1;
+                            }
+                        }
+                    }
+                } else {
+                    if let Some(neighboring_chunk) = match face {
+                        Back => north_chunk,
+                        Forward => south_chunk,
+                        Right => east_chunk,
+                        Left => west_chunk,
+                        _ => continue,
+                    } {
+                        let neigbhor = get_neigbhor_across_chunk(dims, index, face);
+                        for j in 0..6 {
+                            let tmp_face = Face::from(j);
+                            if let Some(tmp) = get_neighbor(neigbhor, tmp_face, dims) {
+                                let voxel = &neighboring_chunk.read().expect("gg")[tmp];
+                                if reg.is_covering(voxel, tmp_face.opposite()) {
+                                    close_voxels[j] = true;
+                                    count += 1;
+                                }
+                            } else {
+                                let tmp = index;
+                                let voxel = &this_chunk[tmp];
+                                if reg.is_covering(voxel, tmp_face.opposite()) {
+                                    close_voxels[j] = true;
+                                    count += 1;
+                                }
+                            }
+                        }
+                    }
+                }
+                if count != 0 {
+                    apply_pbs_quad(
+                        mesh,
+                        &metadata.vivi,
+                        index,
+                        face,
+                        close_voxels,
+                        pbs_value,
+                        reg.get_voxel_dimensions(),
+                        dims,
+                    );
+                }
             }
         }
     }

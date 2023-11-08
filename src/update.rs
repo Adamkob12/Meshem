@@ -1,4 +1,4 @@
-use crate::pbs::*;
+// use crate::pbs::*;
 use crate::prelude::*;
 use bevy::render::mesh::{Indices, VertexAttributeValues};
 
@@ -127,19 +127,19 @@ pub fn update_mesh<T: std::fmt::Debug>(
     }
 
     metadata.changed_voxels.clear();
-    if metadata.pbs.is_some() {
-        apply_pbs(
-            mesh,
-            &metadata.vivi,
-            metadata.dims,
-            min.checked_sub(metadata.dims.0 * metadata.dims.2 * 2)
-                .unwrap_or(0),
-            max.checked_add(metadata.dims.0 * metadata.dims.2 * 2)
-                .unwrap_or(usize::MAX),
-            metadata.pbs.unwrap(),
-            reg.get_voxel_dimensions(),
-        );
-    }
+    // if metadata.pbs.is_some() {
+    //     apply_pbs(
+    //         mesh,
+    //         &metadata.vivi,
+    //         metadata.dims,
+    //         min.checked_sub(metadata.dims.0 * metadata.dims.2 * 2)
+    //             .unwrap_or(0),
+    //         max.checked_add(metadata.dims.0 * metadata.dims.2 * 2)
+    //             .unwrap_or(usize::MAX),
+    //         metadata.pbs.unwrap(),
+    //         reg.get_voxel_dimensions(),
+    //     );
+    // }
 }
 
 // The function removes all quads facing a voxel.
