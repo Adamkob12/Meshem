@@ -20,8 +20,8 @@ Just define a data structure that implements the simple "VoxelRegistry" trait (s
 ### ___Run time mesh updating in O(1):___
 Added in 0.2, this features allows users to easily update the mesh after it has been generated, without any need for regenerating. See the new update_mesh_example.
 ![update mesh video](assets/Screenshots/video1.gif)
-### ___Custom Shadowing, Similar to "Ambient Occlusion" (PBS)___
-Added in 0.3, this feature allowes users to add an ambient occlusion-like effect during mesh generation, "proximity based shadowing":
+### ___Custom Shadowing, Similar to "Ambient Occlusion" (Smooth Lighting)___
+Added in 0.3, this feature allowes users to add an ambient occlusion-like effect during mesh generation, "Smooth Lighting":
 ![Screenshot 2023-11-05 at 16 36 06](https://github.com/Adamkob12/bevy_meshem/assets/46227443/6bc24f3e-d223-4cab-8128-33a3fb9f1bd8)
 ### ___"Introducing" Chunks___
 When generating each mesh, the unused vertices inside the mesh are being culled, but there was no way to automatically cull vertices trapped between two seperatly generated meshes, only manually.
