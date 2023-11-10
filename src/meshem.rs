@@ -27,24 +27,24 @@ pub enum MeshingAlgorithm {
 ///     An example to create a [`VoxelRegistry`] is in the examples folder.
 /// - ['ma'](MeshingAlgorithm): The meshing algorithm to use - currently supports Culling and
 ///     Naive. (Culling is always better than Naive)
-/// - ['pbs']: Enable Proximity Based Shadowing (Some ..) or not (None). PBS is a technique often used in
-///     voxel based games that applies a shadow to the sides of a voxel depending on how many
-///     voxels are in the proximity.
+/// - ['sl']: Enable Smooth Lighting (Some ..) or not (None). Smooth Lighting is a technique often used in
+///     voxel based games that resembles Ambient Occlusion, but it is static- which means the
+///     shadows are computed only once, when the mesh is generated (or updated).
 ///
 /// Return:
 /// - The first mesh is the mesh of the full, normal cube voxels. (for example, the stone blocks)
 /// - MeshMD<T> is the mesh metadata that the user needs to keep if they want to update the mesh.
 /// - None: Couldn't generate the mesh
-pub fn mesh_grid<T>(
+pub fn mesh_grid<T, const N: usize>(
     dims: Dimensions,
     outer_layer: &[Face],
-    grid: &[T],
+    grid: &[T; N],
     reg: &impl VoxelRegistry<Voxel = T>,
-    ma: MeshingAlgorithm,
-    pbs: Option<PbsParameters>,
+    meshing_algorithm: MeshingAlgorithm,
+    smooth_lighting_params: Option<SmoothLightingParameters>,
 ) -> Option<(Mesh, MeshMD<T>)> {
     let mut mesh = Mesh::new(PrimitiveTopology::TriangleList);
-    let ch_len = grid.len();
+    let ch_len = N;
     let mut vivi = VIVI::new(ch_len);
     assert_eq!(
         ch_len,
@@ -122,7 +122,7 @@ pub fn mesh_grid<T>(
                     neig[5] = cull_forward;
                 }
 
-                match ma {
+                match meshing_algorithm {
                     MeshingAlgorithm::Naive => neig = [true; 6],
                     MeshingAlgorithm::Culling => {}
                 }
@@ -157,24 +157,16 @@ pub fn mesh_grid<T>(
         mesh.insert_attribute(att, vals);
     }
     mesh.set_indices(Some(Indices::U32(indices)));
-    if pbs.is_some() {
-        apply_pbs(
-            &mut mesh,
-            &vivi,
-            dims,
-            0,
-            vivi.vivi.len(),
-            pbs.unwrap(),
-            reg.get_voxel_dimensions(),
-        );
-    }
     let d_mesh = MeshMD {
         dims,
-        pbs,
+        smooth_lighting_params,
         vivi,
         changed_voxels: vec![],
     };
 
+    if let Some(_) = smooth_lighting_params {
+        apply_smooth_lighting(reg, &mut mesh, &d_mesh, dims, 0, ch_len, grid);
+    }
     Some((mesh, d_mesh))
 }
 

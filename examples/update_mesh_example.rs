@@ -7,6 +7,7 @@ use rand::prelude::*;
 
 /// Constants for us to use.
 const FACTOR: usize = 8;
+const CHUNK_LEN: usize = FACTOR * FACTOR * FACTOR;
 const SPEED: f32 = FACTOR as f32 * 2.0;
 
 fn main() {
@@ -73,7 +74,7 @@ fn main() {
 #[derive(Component)]
 struct Meshy {
     meta: MeshMD<u16>,
-    grid: Vec<u16>,
+    grid: [u16; CHUNK_LEN],
 }
 
 #[derive(Component)]
@@ -94,7 +95,7 @@ fn setup(
     mut meshes: ResMut<Assets<Mesh>>,
     asset_server: Res<AssetServer>,
 ) {
-    let mut grid: Vec<u16> = vec![1; FACTOR * FACTOR * FACTOR];
+    let mut grid: Vec<u16> = vec![1; CHUNK_LEN];
     grid = grid
         .iter_mut()
         .enumerate()
@@ -106,13 +107,14 @@ fn setup(
             }
         })
         .collect();
+    let g: [u16; CHUNK_LEN] = grid.try_into().unwrap();
     let dims: Dimensions = (FACTOR, FACTOR, FACTOR);
     let texture_mesh = asset_server.load("array_texture.png");
 
     let (culled_mesh, metadata) = mesh_grid(
         dims,
         &[],
-        grid.as_slice(),
+        &g,
         breg.into_inner(),
         MeshingAlgorithm::Culling,
         None,
@@ -132,7 +134,7 @@ fn setup(
         },
         Meshy {
             meta: metadata,
-            grid,
+            grid: g,
         },
     ));
 

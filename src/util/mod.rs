@@ -1,13 +1,15 @@
 pub(crate) mod compressed_voxel_grid;
+pub mod direction;
 pub mod vav;
 
-use crate::prelude::{Dimensions, Face};
+use crate::prelude::{Dimensions, Face, Face::*};
+pub use direction::Direction::*;
+pub use direction::*;
 
 pub(crate) fn in_range(x: usize, bot: usize, top: usize) -> bool {
     return bot <= x && x < top;
 }
 
-use crate::prelude::*;
 use bevy::prelude::Vec3;
 
 pub fn position_to_chunk(pos: Vec3, chunk_dims: (usize, usize, usize)) -> [i32; 2] {
@@ -75,6 +77,65 @@ pub const fn three_d_cords_arr(oned: usize, dims: (usize, usize, usize)) -> [usi
     assert!(l < length, "Out of bounds to convert into 3d coordinate.");
 
     [w, h, l]
+}
+
+pub const fn three_d_cords_arr_safe(
+    oned: usize,
+    dims: (usize, usize, usize),
+) -> Option<[usize; 3]> {
+    let height = dims.1;
+    let length = dims.2;
+    let width = dims.0;
+
+    let h = (oned / (length * width)) as usize;
+    let l = ((oned - h * (length * width)) / width) as usize;
+    let w = (oned - h * (length * width) - l * width) as usize;
+
+    if w > width || h > height || l > length {
+        return None;
+    }
+
+    Some([w, h, l])
+}
+
+pub fn get_block_n_away(
+    dims: Dimensions,
+    index: usize,
+    x_change: i32,
+    y_change: i32,
+    z_change: i32,
+) -> Option<(Option<Direction>, usize)> {
+    let cords = three_d_cords_arr_safe(index, dims)?;
+    // if y_change.abs() as usize >= dims.1
+    //     || x_change.abs() as usize >= dims.0
+    //     || z_change.abs() as usize >= dims.2
+    // {
+    //     return None;
+    // }
+
+    let new_cords = [
+        cords[0] as i32 + x_change,
+        cords[1] as i32 + y_change,
+        cords[2] as i32 + z_change,
+    ];
+    let change = [
+        (new_cords[0] as f32 / dims.0 as f32).floor() as i32,
+        (new_cords[2] as f32 / dims.2 as f32).floor() as i32,
+    ];
+    let dir = from_cords_change(change);
+    let new_cords = [
+        new_cords[0].rem_euclid(dims.0 as i32),
+        new_cords[1],
+        new_cords[2].rem_euclid(dims.2 as i32),
+    ];
+    let new_cords: [usize; 3] = [
+        new_cords[0] as usize,
+        new_cords[1] as usize,
+        new_cords[2] as usize,
+    ];
+
+    let one_d = one_d_cords_safe(new_cords, dims)?;
+    Some((dir, one_d))
 }
 
 pub const fn one_d_cords(threed: [usize; 3], dims: (usize, usize, usize)) -> usize {
@@ -156,8 +217,8 @@ pub fn get_neigbhor_across_chunk(dims: Dimensions, index: usize, face: Face) -> 
 /// None if the neighbor is out of bounds. For example:
 /// assert_eq!(get_neighbor(0, Top, (2,2,2)), Some(5));
 /// assert_eq!(get_neighbor(5, Top, (2,2,2)), None);
-pub fn get_neighbor(voxel: usize, face: Face, dims: Dimensions) -> Option<usize> {
-    let a = three_d_cords(voxel, dims);
+pub fn get_neighbor(index: usize, face: Face, dims: Dimensions) -> Option<usize> {
+    let a = three_d_cords(index, dims);
     match face {
         Face::Top if a.1 + 1 < dims.1 => Some(one_d_cords([a.0, a.1 + 1, a.2], dims)),
         Face::Bottom if a.1 > 0 => Some(one_d_cords([a.0, a.1 - 1, a.2], dims)),

@@ -68,14 +68,14 @@ fn setup(
     // wireframe_config: ResMut<WireframeConfig>,
     mut meshes: ResMut<Assets<Mesh>>,
 ) {
-    let grid: Vec<u16> = vec![1; FACTOR * FACTOR * FACTOR];
+    let grid = [1; FACTOR * FACTOR * FACTOR];
     let dims: Dimensions = (FACTOR, FACTOR, FACTOR);
 
     let (culled_mesh, metadata) = mesh_grid(
         dims,
         // Automatically cull the bottom when generating the mesh
         &[Bottom],
-        grid.as_slice(),
+        &grid,
         breg.into_inner(),
         MESHING_ALGORITHM,
         None,
@@ -323,7 +323,7 @@ fn regenerate_mesh(
         let mesh = meshes
             .get_mut(mesh_query.get_single().unwrap())
             .expect("Couldn't get a mut ref to the mesh");
-        let grid: Vec<u16> = vec![1; FACTOR * FACTOR * FACTOR];
+        let grid = [1; FACTOR * FACTOR * FACTOR];
         let dims: Dimensions = (FACTOR / 2, FACTOR * 2, FACTOR);
 
         let m = meshy.get_single_mut().unwrap().into_inner();
@@ -336,7 +336,7 @@ fn regenerate_mesh(
         (*mesh, m.meta) = mesh_grid(
             dims,
             &[Bottom],
-            grid.as_slice(),
+            &grid,
             breg.into_inner(),
             m.ma.clone(),
             None,
