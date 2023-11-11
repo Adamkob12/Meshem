@@ -1,13 +1,13 @@
-//! Smooth Lighting means proximity-based shadowing. It is a form of shadowing specific to Voxel-Based games,
-//! where, regardless of a light source, the game applies a shadow to voxels based on their
-//! proximity to other voxels.
+//! This module is responsible for Smooth Lighting. Smooth Lighting is a technique often used in
+/// voxel based games that resembles Ambient Occlusion, but it is static- which means the
+/// shadows are computed only once, when the mesh is generated (or updated).
 use crate::prelude::*;
 use bevy::math::Vec3;
 use bevy::render::mesh::{Mesh, VertexAttributeValues};
 use std::sync::{Arc, RwLock};
 
 #[derive(Copy, Clone)]
-/// Parameters for Proximity Based Shadowing
+/// Parameters for Smooth Lighting
 pub struct SmoothLightingParameters {
     /// How intense the shadow is. 0.0 - 1.0
     pub intensity: f32,
@@ -17,6 +17,9 @@ pub struct SmoothLightingParameters {
     /// Smoothing will often lower the overall intensity of the shadowing, but in return
     /// the scene will look more uniform. Recommended: 1.0 - 2.0
     pub smoothing: f32,
+    /// True => Apply automatically after generating.
+    /// False => The user will apply it manually using the smooth lighting API. (ex: `apply_smooth_lighting`)
+    pub apply_at_gen: bool,
 }
 
 pub(crate) fn apply_sl_quad(
@@ -123,7 +126,7 @@ pub fn apply_smooth_lighting<T, const N: usize>(
         lower_bound,
         upper_bound,
         this_chunk,
-        None::<&Arc<RwLock<[T; N]>>>,
+        None,
         None,
         None,
         None,
@@ -133,22 +136,23 @@ pub fn apply_smooth_lighting<T, const N: usize>(
         None,
     );
 }
-pub fn apply_smooth_lighting_with_connected_chunks<T, const N: usize>(
+
+pub fn apply_smooth_lighting_with_connected_chunks<'a, T>(
     reg: &impl VoxelRegistry<Voxel = T>,
     mesh: &mut Mesh,
     metadata: &MeshMD<T>,
     dims: Dimensions,
     lower_bound: usize,
     upper_bound: usize,
-    this_chunk: &[T; N],
-    north_chunk: Option<&Arc<RwLock<[T; N]>>>,
-    south_chunk: Option<&Arc<RwLock<[T; N]>>>,
-    east_chunk: Option<&Arc<RwLock<[T; N]>>>,
-    west_chunk: Option<&Arc<RwLock<[T; N]>>>,
-    no_east_chunk: Option<&Arc<RwLock<[T; N]>>>,
-    no_west_chunk: Option<&Arc<RwLock<[T; N]>>>,
-    so_east_chunk: Option<&Arc<RwLock<[T; N]>>>,
-    so_west_chunk: Option<&Arc<RwLock<[T; N]>>>,
+    this_chunk: &'a [T],
+    north_chunk: Option<&'a [T]>,
+    south_chunk: Option<&'a [T]>,
+    east_chunk: Option<&'a [T]>,
+    west_chunk: Option<&'a [T]>,
+    no_east_chunk: Option<&'a [T]>,
+    no_west_chunk: Option<&'a [T]>,
+    so_east_chunk: Option<&'a [T]>,
+    so_west_chunk: Option<&'a [T]>,
 ) {
     if let Some(sl) = metadata.smooth_lighting_params {
         for (index, quads) in metadata.vivi.vivi.iter().enumerate().skip(lower_bound) {
@@ -241,6 +245,216 @@ pub fn apply_smooth_lighting_with_connected_chunks<T, const N: usize>(
                                         Some(North) if north_chunk.is_some() => {
                                             covering_multiple_faces(
                                                 reg,
+                                                &north_chunk.unwrap()[neighbor_index],
+                                                faces,
+                                            )
+                                        }
+                                        Some(South) if south_chunk.is_some() => {
+                                            covering_multiple_faces(
+                                                reg,
+                                                &south_chunk.unwrap()[neighbor_index],
+                                                faces,
+                                            )
+                                        }
+                                        Some(East) if east_chunk.is_some() => {
+                                            covering_multiple_faces(
+                                                reg,
+                                                &east_chunk.unwrap()[neighbor_index],
+                                                faces,
+                                            )
+                                        }
+                                        Some(West) if west_chunk.is_some() => {
+                                            covering_multiple_faces(
+                                                reg,
+                                                &west_chunk.unwrap()[neighbor_index],
+                                                faces,
+                                            )
+                                        }
+                                        Some(NoEast) if no_east_chunk.is_some() => {
+                                            covering_multiple_faces(
+                                                reg,
+                                                &no_east_chunk.unwrap()[neighbor_index],
+                                                faces,
+                                            )
+                                        }
+                                        Some(NoWest) if no_west_chunk.is_some() => {
+                                            covering_multiple_faces(
+                                                reg,
+                                                &no_west_chunk.unwrap()[neighbor_index],
+                                                faces,
+                                            )
+                                        }
+                                        Some(SoEast) if so_east_chunk.is_some() => {
+                                            covering_multiple_faces(
+                                                reg,
+                                                &so_east_chunk.unwrap()[neighbor_index],
+                                                faces,
+                                            )
+                                        }
+                                        Some(SoWest) if so_west_chunk.is_some() => {
+                                            covering_multiple_faces(
+                                                reg,
+                                                &so_west_chunk.unwrap()[neighbor_index],
+                                                faces,
+                                            )
+                                        }
+                                        _ => false,
+                                    };
+                                }
+                            }
+                        }
+                    }
+                }
+                if surrounding_blocks != [false; 3 * 3 * 3] {
+                    // dbg!(1);
+                    // surrounding_blocks = [false ; 3 * 3 * 3];
+                    apply_sl_quad(
+                        mesh,
+                        &metadata.vivi,
+                        index,
+                        face,
+                        surrounding_blocks,
+                        sl,
+                        reg.get_voxel_dimensions(),
+                        dims,
+                    )
+                }
+            }
+        }
+    }
+}
+
+fn covering_multiple_faces<T>(
+    reg: &impl VoxelRegistry<Voxel = T>,
+    voxel: &T,
+    faces: [bool; 6],
+) -> bool {
+    for (i, b) in faces.iter().enumerate() {
+        if !*b {
+            continue;
+        }
+        if !reg.is_covering(voxel, Face::from(i)) {
+            // dbg!(2);
+            return false;
+        }
+    }
+    true
+}
+
+pub fn apply_smooth_lighting_with_connected_chunks_arc<T, const N: usize>(
+    reg: &impl VoxelRegistry<Voxel = T>,
+    mesh: &mut Mesh,
+    metadata: &MeshMD<T>,
+    dims: Dimensions,
+    lower_bound: usize,
+    upper_bound: usize,
+    this_chunk: &[T; N],
+    north_chunk: Option<&Arc<RwLock<[T; N]>>>,
+    south_chunk: Option<&Arc<RwLock<[T; N]>>>,
+    east_chunk: Option<&Arc<RwLock<[T; N]>>>,
+    west_chunk: Option<&Arc<RwLock<[T; N]>>>,
+    no_east_chunk: Option<&Arc<RwLock<[T; N]>>>,
+    no_west_chunk: Option<&Arc<RwLock<[T; N]>>>,
+    so_east_chunk: Option<&Arc<RwLock<[T; N]>>>,
+    so_west_chunk: Option<&Arc<RwLock<[T; N]>>>,
+) {
+    // let north_chunk = &*north_chunk.unwrap().read().unwrap();
+    if let Some(sl) = metadata.smooth_lighting_params {
+        for (index, quads) in metadata.vivi.vivi.iter().enumerate().skip(lower_bound) {
+            if index > upper_bound {
+                break;
+            }
+            for q in quads {
+                let mut surrounding_blocks = [false; 3 * 3 * 3];
+                let cage_dims = (3, 3, 3);
+                let face = face_from_u32(q & REVERSE_OFFSET_CONST);
+
+                if (matches!(face, Bottom) || matches!(face, Top))
+                    && is_block_on_edge(dims, index, face)
+                {
+                    continue;
+                }
+                let (neighbor, chunk_dir) = {
+                    if is_block_on_edge(dims, index, face) {
+                        (
+                            get_neigbhor_across_chunk(dims, index, face),
+                            Some(crate::util::Direction::from(face)),
+                        )
+                    } else {
+                        (get_neighbor(index, face, dims).unwrap(), None)
+                    }
+                };
+                // if reg.is_covering(&this_chunk[neighbor], face.opposite()) { continue; }
+
+                let og_index_in_cage: [i32; 3] = match face {
+                    Top => [0, -1, 0],
+                    Bottom => [0, 1, 0],
+                    Right => [-1, 0, 0],
+                    Left => [1, 0, 0],
+                    Back => [0, 0, -1],
+                    Forward => [0, 0, 1],
+                };
+                let [og_x, og_y, og_z] = og_index_in_cage;
+
+                for y in -1..=1 {
+                    for z in -1..=1 {
+                        for x in -1..=1 {
+                            if (og_x == x && og_y == y)
+                                || (og_x == x && og_z == z)
+                                || (og_y == y && og_z == z)
+                            {
+                                continue;
+                            }
+                            if (og_x == x && og_x != 0)
+                                || (og_y == y && og_y != 0)
+                                || (og_z == z && og_z != 0)
+                            {
+                                continue;
+                            }
+                            if (og_x == x + 2 && og_x != 0)
+                                || (og_y == y + 2 && og_y != 0)
+                                || (og_z == z + 2 && og_z != 0)
+                            {
+                                continue;
+                            }
+                            if (og_x == x - 2 && og_x != 0)
+                                || (og_y == y - 2 && og_y != 0)
+                                || (og_z == z - 2 && og_z != 0)
+                            {
+                                continue;
+                            }
+
+                            let cage_index = one_d_cords(
+                                [(x + 1) as usize, (y + 1) as usize, (z + 1) as usize],
+                                cage_dims,
+                            );
+                            let faces = [y < 0, y > 0, x < 0, x > 0, z < 0, z > 0];
+
+                            match get_block_n_away(dims, neighbor, x, y, z) {
+                                None => {
+                                    continue;
+                                }
+                                Some((dir, neighbor_index)) => {
+                                    let final_dir = crate::prelude::util::Direction::add_direction(
+                                        chunk_dir, dir,
+                                    );
+                                    // if chunk_dir.is_some() && dir.is_some() {
+                                    //     dbg!(final_dir, chunk_dir.unwrap(), dir.unwrap());
+                                    // }
+                                    surrounding_blocks[cage_index] = match final_dir {
+                                        None => covering_multiple_faces(
+                                            reg,
+                                            &this_chunk[neighbor_index],
+                                            faces,
+                                        ),
+                                        // Some(North) => covering_multiple_faces(
+                                        //     reg,
+                                        //     &north_chunk[neighbor_index],
+                                        //     faces,
+                                        // ),
+                                        Some(North) if north_chunk.is_some() => {
+                                            covering_multiple_faces(
+                                                reg,
                                                 &north_chunk.unwrap().read().unwrap()
                                                     [neighbor_index],
                                                 faces,
@@ -326,21 +540,4 @@ pub fn apply_smooth_lighting_with_connected_chunks<T, const N: usize>(
             }
         }
     }
-}
-
-fn covering_multiple_faces<T>(
-    reg: &impl VoxelRegistry<Voxel = T>,
-    voxel: &T,
-    faces: [bool; 6],
-) -> bool {
-    for (i, b) in faces.iter().enumerate() {
-        if !*b {
-            continue;
-        }
-        if !reg.is_covering(voxel, Face::from(i)) {
-            // dbg!(2);
-            return false;
-        }
-    }
-    true
 }

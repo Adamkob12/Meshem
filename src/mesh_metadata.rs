@@ -116,4 +116,8 @@ impl<T> MeshMD<T> {
         self.changed_voxels
             .push((voxel, voxel_index, voxel_change, neighboring_voxels));
     }
+    /// Get read only of the `SmoothLightingParameters`
+    pub fn get_sl_params(&self) -> Option<SmoothLightingParameters> {
+        self.smooth_lighting_params
+    }
 }

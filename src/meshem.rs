@@ -164,8 +164,10 @@ pub fn mesh_grid<T, const N: usize>(
         changed_voxels: vec![],
     };
 
-    if let Some(_) = smooth_lighting_params {
-        apply_smooth_lighting(reg, &mut mesh, &d_mesh, dims, 0, ch_len, grid);
+    if let Some(t) = smooth_lighting_params {
+        if t.apply_at_gen {
+            apply_smooth_lighting(reg, &mut mesh, &d_mesh, dims, 0, ch_len, grid);
+        }
     }
     Some((mesh, d_mesh))
 }
