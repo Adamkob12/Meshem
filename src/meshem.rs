@@ -6,7 +6,7 @@ use bevy::render::mesh::{Indices, MeshVertexAttribute, VertexAttributeValues};
 use bevy::render::render_resource::PrimitiveTopology;
 
 /// All the variants for the Meshing algorithm.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub enum MeshingAlgorithm {
     Naive,
     Culling,
@@ -35,16 +35,16 @@ pub enum MeshingAlgorithm {
 /// - The first mesh is the mesh of the full, normal cube voxels. (for example, the stone blocks)
 /// - MeshMD<T> is the mesh metadata that the user needs to keep if they want to update the mesh.
 /// - None: Couldn't generate the mesh
-pub fn mesh_grid<T, const N: usize>(
+pub fn mesh_grid<T>(
     dims: Dimensions,
     outer_layer: &[Face],
-    grid: &[T; N],
+    grid: &[T],
     reg: &impl VoxelRegistry<Voxel = T>,
     meshing_algorithm: MeshingAlgorithm,
     smooth_lighting_params: Option<SmoothLightingParameters>,
 ) -> Option<(Mesh, MeshMD<T>)> {
     let mut mesh = Mesh::new(PrimitiveTopology::TriangleList);
-    let ch_len = N;
+    let ch_len = grid.len();
     let mut vivi = VIVI::new(ch_len);
     assert_eq!(
         ch_len,

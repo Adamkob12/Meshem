@@ -106,12 +106,12 @@ pub fn get_block_n_away(
     z_change: i32,
 ) -> Option<(Option<Direction>, usize)> {
     let cords = three_d_cords_arr_safe(index, dims)?;
-    // if y_change.abs() as usize >= dims.1
-    //     || x_change.abs() as usize >= dims.0
-    //     || z_change.abs() as usize >= dims.2
-    // {
-    //     return None;
-    // }
+    if y_change.abs() as usize >= dims.1
+        || x_change.abs() as usize >= dims.0
+        || z_change.abs() as usize >= dims.2
+    {
+        return None;
+    }
 
     let new_cords = [
         cords[0] as i32 + x_change,
@@ -207,7 +207,7 @@ pub fn get_neigbhor_across_chunk(dims: Dimensions, index: usize, face: Face) -> 
             Left => index + dims.0 - 1,
             Back => index - dims.0 * (dims.2 - 1),
             Forward => index + dims.0 * (dims.2 - 1),
-            _ => panic!("Shouldn't happen"),
+            _ => panic!("Vertical chunks aren't supported"),
         };
     }
     panic!("`get_neigbhor_across_chunk` was called on a block that wasn't on the edge of a chunk");

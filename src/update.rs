@@ -76,16 +76,18 @@ pub fn update_mesh<T: std::fmt::Debug>(
 
         match *change {
             VoxelChange::Added => {
-                add_voxel_after_gen(
-                    neig,
-                    mesh,
-                    reg.get_mesh(voxel).unwrap(),
-                    &mut metadata.vivi,
-                    *index,
-                    reg.get_center(),
-                    position_offset,
-                );
-                remove_quads_facing(mesh, &mut metadata.vivi, *index, metadata.dims, covering);
+                if let VoxelMesh::NormalCube(voxel_mesh) = reg.get_mesh(voxel) {
+                    add_voxel_after_gen(
+                        neig,
+                        mesh,
+                        voxel_mesh,
+                        &mut metadata.vivi,
+                        *index,
+                        reg.get_center(),
+                        position_offset,
+                    );
+                    remove_quads_facing(mesh, &mut metadata.vivi, *index, metadata.dims, covering);
+                }
             }
             VoxelChange::Broken => {
                 remove_voxel(mesh, &mut metadata.vivi, *index, [true; 6]);
@@ -113,15 +115,17 @@ pub fn update_mesh<T: std::fmt::Debug>(
                 );
             }
             VoxelChange::AddFaces => {
-                add_voxel_after_gen(
-                    neig,
-                    mesh,
-                    reg.get_mesh(voxel).unwrap(),
-                    &mut metadata.vivi,
-                    *index,
-                    reg.get_center(),
-                    position_offset,
-                );
+                if let VoxelMesh::NormalCube(voxel_mesh) = reg.get_mesh(voxel) {
+                    add_voxel_after_gen(
+                        neig,
+                        mesh,
+                        voxel_mesh,
+                        &mut metadata.vivi,
+                        *index,
+                        reg.get_center(),
+                        position_offset,
+                    );
+                }
             }
         }
     }

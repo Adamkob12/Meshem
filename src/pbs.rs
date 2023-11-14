@@ -109,14 +109,14 @@ pub(crate) fn apply_sl_quad(
     }
 }
 
-pub fn apply_smooth_lighting<T, const N: usize>(
+pub fn apply_smooth_lighting<T>(
     reg: &impl VoxelRegistry<Voxel = T>,
     mesh: &mut Mesh,
     metadata: &MeshMD<T>,
     dims: Dimensions,
     lower_bound: usize,
     upper_bound: usize,
-    this_chunk: &[T; N],
+    this_chunk: &[T],
 ) {
     apply_smooth_lighting_with_connected_chunks(
         reg,
