@@ -305,20 +305,16 @@ pub fn apply_smooth_lighting_with_connected_chunks<'a, T>(
                         }
                     }
                 }
-                if surrounding_blocks != [false; 3 * 3 * 3] {
-                    // dbg!(1);
-                    // surrounding_blocks = [false ; 3 * 3 * 3];
-                    apply_sl_quad(
-                        mesh,
-                        &metadata.vivi,
-                        index,
-                        face,
-                        surrounding_blocks,
-                        sl,
-                        reg.get_voxel_dimensions(),
-                        dims,
-                    )
-                }
+                apply_sl_quad(
+                    mesh,
+                    &metadata.vivi,
+                    index,
+                    face,
+                    surrounding_blocks,
+                    sl,
+                    reg.get_voxel_dimensions(),
+                    dims,
+                )
             }
         }
     }
@@ -523,20 +519,16 @@ pub fn apply_smooth_lighting_with_connected_chunks_arc<T, const N: usize>(
                         }
                     }
                 }
-                if surrounding_blocks != [false; 3 * 3 * 3] {
-                    // dbg!(1);
-                    // surrounding_blocks = [false ; 3 * 3 * 3];
-                    apply_sl_quad(
-                        mesh,
-                        &metadata.vivi,
-                        index,
-                        face,
-                        surrounding_blocks,
-                        sl,
-                        reg.get_voxel_dimensions(),
-                        dims,
-                    )
-                }
+                apply_sl_quad(
+                    mesh,
+                    &metadata.vivi,
+                    index,
+                    face,
+                    surrounding_blocks,
+                    sl,
+                    reg.get_voxel_dimensions(),
+                    dims,
+                )
             }
         }
     }
