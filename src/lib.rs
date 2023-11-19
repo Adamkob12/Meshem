@@ -4,7 +4,7 @@ pub(crate) mod mesh_metadata;
 pub(crate) mod meshem;
 pub(crate) mod pbs;
 pub(crate) mod update;
-pub(crate) mod util;
+pub mod util;
 pub(crate) mod voxel_mesh;
 
 use bevy::log::warn;
