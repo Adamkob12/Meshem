@@ -23,7 +23,13 @@ pub fn introduce_adjacent_chunks<T: std::fmt::Debug + Sized + Copy>(
     );
     let dims = main_md.dims;
     for index in iter_faces_of_chunk(dims, connection_side) {
-        let adj_voxel_index = get_neigbhor_across_chunk(dims, index, connection_side);
+        let adj_voxel_index = get_neigbhor_across_chunk_safe(dims, index, connection_side);
+        let adj_voxel_index = if adj_voxel_index.is_some() {
+            adj_voxel_index.unwrap()
+        } else {
+            continue;
+        };
+
         let adj_voxel = adjacent_chunk_grid[adj_voxel_index];
         if reg.is_covering(&adj_voxel, connection_side.opposite()) {
             let mut tmp = [None; 6];
