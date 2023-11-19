@@ -250,10 +250,11 @@ pub fn get_neigbhors_from_across_chunks(dims: Dimensions, index: usize) -> Vec<(
     edges
         .iter()
         .filter_map(|f| {
-            if (*f as usize) < 2 {
+            let tmp = get_neigbhor_across_chunk_safe(dims, index, *f);
+            if tmp.is_none() {
                 None
             } else {
-                Some((*f, get_neigbhor_across_chunk(dims, index, *f)))
+                Some((*f, tmp.unwrap()))
             }
         })
         .collect()
