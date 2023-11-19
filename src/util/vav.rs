@@ -3,7 +3,7 @@
 //! readabillity of main API.
 #![allow(unused_variables)]
 use bevy::render::{mesh::VertexAttributeValues, render_resource::VertexFormat};
-pub(crate) trait VAVutils {
+pub trait VAVutils {
     fn extend(&mut self, t: &Self);
     fn filter_bool_array(&self, index_filter: Vec<bool>) -> Self;
     fn new(format: VertexFormat) -> VertexAttributeValues;

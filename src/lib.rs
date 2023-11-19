@@ -20,7 +20,7 @@ pub mod prelude {
     pub use crate::pbs::*;
     pub use crate::update::*;
     pub(crate) use crate::util::compressed_voxel_grid::*;
-    pub(crate) use crate::util::vav::*;
+    pub use crate::util::vav::*;
     pub use crate::util::*;
     pub use crate::voxel_mesh::*;
     pub use crate::VoxelRegistry;
