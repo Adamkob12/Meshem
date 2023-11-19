@@ -217,7 +217,7 @@ pub fn get_neigbhor_across_chunk_safe(dims: Dimensions, index: usize, face: Face
     if is_block_on_edge(dims, index, face) {
         return match face {
             Right => index.checked_sub(dims.0 - 1),
-            Left => index.checked_add(dims.0 + 1),
+            Left => index.checked_add(dims.0 - 1),
             Back => index.checked_sub(dims.0 * (dims.2 - 1)),
             Forward => index.checked_add(dims.0 * (dims.2 - 1)),
             _ => None,
