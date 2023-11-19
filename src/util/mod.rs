@@ -213,6 +213,18 @@ pub fn get_neigbhor_across_chunk(dims: Dimensions, index: usize, face: Face) -> 
     panic!("`get_neigbhor_across_chunk` was called on a block that wasn't on the edge of a chunk");
 }
 
+pub fn get_neigbhor_across_chunk_safe(dims: Dimensions, index: usize, face: Face) -> Option<usize> {
+    if is_block_on_edge(dims, index, face) {
+        return match face {
+            Right => index.checked_sub(dims.0 + 1),
+            Left => index.checked_add(dims.0 - 1),
+            Back => index.checked_sub(dims.0 * (dims.2 - 1)),
+            Forward => index.checked_add(dims.0 * (dims.2 - 1)),
+            _ => None,
+        };
+    }
+    None
+}
 /// Function to get the neighbor towards the `Face` in a 3d grid.
 /// None if the neighbor is out of bounds. For example:
 /// assert_eq!(get_neighbor(0, Top, (2,2,2)), Some(5));
