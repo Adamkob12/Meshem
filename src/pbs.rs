@@ -172,12 +172,17 @@ pub fn apply_smooth_lighting_with_connected_chunks<'a, T>(
                 let (neighbor, chunk_dir) = {
                     if is_block_on_edge(dims, index, face) {
                         (
-                            get_neigbhor_across_chunk(dims, index, face),
+                            get_neigbhor_across_chunk_safe(dims, index, face),
                             Some(crate::util::Direction::from(face)),
                         )
                     } else {
-                        (get_neighbor(index, face, dims).unwrap(), None)
+                        (Some(get_neighbor(index, face, dims)).unwrap(), None)
                     }
+                };
+                let neighbor = if neighbor.is_some() {
+                    neighbor.unwrap()
+                } else {
+                    continue;
                 };
                 // if reg.is_covering(&this_chunk[neighbor], face.opposite()) { continue; }
 
