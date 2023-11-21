@@ -77,6 +77,7 @@ pub fn update_mesh<T: std::fmt::Debug>(
         match *change {
             VoxelChange::Added => {
                 if let VoxelMesh::NormalCube(voxel_mesh) = reg.get_mesh(voxel) {
+                    remove_voxel(mesh, &mut metadata.vivi, *index, [true; 6]);
                     add_voxel_after_gen(
                         neig,
                         mesh,
