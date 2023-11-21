@@ -57,10 +57,7 @@ impl<T> VoxelMesh<T> {
     pub fn unwrap(self) -> T {
         match self {
             Self::NormalCube(t) => t,
-            Self::CustomMesh(t) => {
-                warn!("Custom Meshes are still not properly implemented!");
-                t
-            }
+            Self::CustomMesh(t) => t,
             Self::Null => panic!("Tried unwrapping a Null VoxelMesh type."),
         }
     }
