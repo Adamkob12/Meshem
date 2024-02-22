@@ -3,6 +3,7 @@
 use crate::prelude::*;
 use bevy::prelude::*;
 use bevy::render::mesh::Indices;
+use bevy::render::render_asset::RenderAssetUsages;
 use bevy::render::render_resource::PrimitiveTopology;
 
 /// Function that generates the mesh of a voxel.
@@ -15,7 +16,10 @@ pub fn generate_voxel_mesh(
     default_color_intensity: Option<f32>,
     alpha: f32,
 ) -> Mesh {
-    let mut cube_mesh = Mesh::new(PrimitiveTopology::TriangleList);
+    let mut cube_mesh = Mesh::new(
+        PrimitiveTopology::TriangleList,
+        RenderAssetUsages::default(),
+    );
     let y = voxel_dims[1] / 2.0 + voxel_center[1];
     let ny = y - voxel_dims[1];
     let x = voxel_dims[0] / 2.0 + voxel_center[0];
@@ -175,14 +179,14 @@ pub fn generate_voxel_mesh(
     // Read more about how to correctly build a mesh manually in the Bevy documentation of a Mesh,
     // further examples and the implementation of the built-in shapes.
     #[rustfmt::skip]
-    cube_mesh.set_indices(Some(Indices::U32(vec![
+    cube_mesh.insert_indices(Indices::U32(vec![
         0,1,3 , 2,3,1, // triangles making up the top (+y) facing side.
         4,5,7 , 6,7,5, // bottom (-y)
         8,9,11 , 10,11,9, // right (+x)
         12,13,15 , 14,15,13, // left (-x)
         16,17,19 , 18,19,17, // back (+z)
         20,21,23 , 22,23,21, // forward (-z)
-    ])));
+    ]));
 
     cube_mesh
 }

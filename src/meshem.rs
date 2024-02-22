@@ -3,6 +3,7 @@ use crate::pbs::*;
 use crate::prelude::*;
 use bevy::prelude::*;
 use bevy::render::mesh::{Indices, MeshVertexAttribute, VertexAttributeValues};
+use bevy::render::render_asset::RenderAssetUsages;
 use bevy::render::render_resource::PrimitiveTopology;
 
 /// All the variants for the Meshing algorithm.
@@ -43,7 +44,10 @@ pub fn mesh_grid<T>(
     meshing_algorithm: MeshingAlgorithm,
     smooth_lighting_params: Option<SmoothLightingParameters>,
 ) -> Option<(Mesh, MeshMD<T>)> {
-    let mut mesh = Mesh::new(PrimitiveTopology::TriangleList);
+    let mut mesh = Mesh::new(
+        PrimitiveTopology::TriangleList,
+        RenderAssetUsages::default(),
+    );
     let ch_len = grid.len();
     let mut vivi = VIVI::new(ch_len);
     assert_eq!(
@@ -156,7 +160,7 @@ pub fn mesh_grid<T>(
     for (att, vals) in vertices {
         mesh.insert_attribute(att, vals);
     }
-    mesh.set_indices(Some(Indices::U32(indices)));
+    mesh.insert_indices(Indices::U32(indices));
     let d_mesh = MeshMD {
         dims,
         smooth_lighting_params,
