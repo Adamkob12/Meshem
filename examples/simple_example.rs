@@ -25,7 +25,7 @@ fn main() {
         ),
     })
     .insert_resource(AmbientLight {
-        brightness: 1.5,
+        brightness: 1500.0,
         color: Color::WHITE,
     });
 
@@ -216,36 +216,36 @@ impl VoxelRegistry for BlockRegistry {
 
 /// Simple system to handle inputs for the showcase.
 fn input_handler(
-    keyboard_input: Res<Input<KeyCode>>,
+    keyboard_input: Res<ButtonInput<KeyCode>>,
     mut query: Query<&mut Transform, With<Meshy>>,
     time: Res<Time>,
     mut event_writer: EventWriter<ToggleWireframe>,
     mut e: EventWriter<RegenerateMesh>,
 ) {
-    if keyboard_input.pressed(KeyCode::X) {
+    if keyboard_input.pressed(KeyCode::KeyX) {
         for mut transform in &mut query {
             transform.rotate_x(time.delta_seconds() / 1.2);
         }
     }
-    if keyboard_input.pressed(KeyCode::Y) {
+    if keyboard_input.pressed(KeyCode::KeyY) {
         for mut transform in &mut query {
             transform.rotate_y(time.delta_seconds() / 1.2);
         }
     }
-    if keyboard_input.pressed(KeyCode::Z) {
+    if keyboard_input.pressed(KeyCode::KeyZ) {
         for mut transform in &mut query {
             transform.rotate_z(time.delta_seconds() / 1.2);
         }
     }
-    if keyboard_input.pressed(KeyCode::R) {
+    if keyboard_input.pressed(KeyCode::KeyR) {
         for mut transform in &mut query {
             transform.look_to(Vec3::NEG_Z, Vec3::Y);
         }
     }
-    if keyboard_input.just_pressed(KeyCode::T) {
+    if keyboard_input.just_pressed(KeyCode::KeyT) {
         event_writer.send_default();
     }
-    if keyboard_input.just_pressed(KeyCode::C) {
+    if keyboard_input.just_pressed(KeyCode::KeyC) {
         e.send_default();
     }
 }
@@ -274,7 +274,7 @@ fn toggle_wireframe(
 }
 
 fn input_handler_rotation(
-    keyboard_input: Res<Input<KeyCode>>,
+    keyboard_input: Res<ButtonInput<KeyCode>>,
     mut query: Query<&mut Transform, With<Camera>>,
     time: Res<Time>,
 ) {
@@ -285,16 +285,16 @@ fn input_handler_rotation(
     if keyboard_input.pressed(KeyCode::ShiftLeft) {
         t.translation += Vec3::NEG_Y * SPEED * time.delta_seconds();
     }
-    if keyboard_input.pressed(KeyCode::S) {
+    if keyboard_input.pressed(KeyCode::KeyS) {
         t.translation += t.back() * SPEED * time.delta_seconds();
     }
-    if keyboard_input.pressed(KeyCode::W) {
+    if keyboard_input.pressed(KeyCode::KeyW) {
         t.translation += t.forward() * SPEED * time.delta_seconds();
     }
-    if keyboard_input.pressed(KeyCode::A) {
+    if keyboard_input.pressed(KeyCode::KeyA) {
         t.translation += t.left() * SPEED * time.delta_seconds();
     }
-    if keyboard_input.pressed(KeyCode::D) {
+    if keyboard_input.pressed(KeyCode::KeyD) {
         t.translation += t.right() * SPEED * time.delta_seconds();
     }
     t.look_at(
