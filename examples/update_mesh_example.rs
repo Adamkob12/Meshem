@@ -51,7 +51,7 @@ fn main() {
         dirt: mesh2,
     })
     .insert_resource(AmbientLight {
-        brightness: 0.3,
+        brightness: 400.0,
         color: Color::WHITE,
     });
 

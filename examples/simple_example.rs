@@ -25,7 +25,7 @@ fn main() {
         ),
     })
     .insert_resource(AmbientLight {
-        brightness: 1.5,
+        brightness: 1500.0,
         color: Color::WHITE,
     });
 
