@@ -1,6 +1,6 @@
 // use crate::pbs::*;
 use crate::prelude::*;
-use bevy::render::mesh::{Indices, VertexAttributeValues};
+use bevy::render::mesh::{Indices, MeshVertexAttributeId, VertexAttributeValues};
 
 /// The function updates the mesh according to the change log in the mesh meta data.
 pub fn update_mesh<T: std::fmt::Debug>(
@@ -380,12 +380,12 @@ fn add_voxel_after_gen(
     }
     indices_main.extend(indices_to_save);
 
-    for (id, vals) in main_mesh.attributes_mut() {
+    for (attr, vals) in main_mesh.attributes_mut() {
         let mut att = voxel
-            .attribute(id)
-            .expect(format!("Couldn't retrieve voxel mesh attribute {:?}.", id).as_str())
+            .attribute(attr.id)
+            .expect(format!("Couldn't retrieve voxel mesh attribute {:?}.", attr.id).as_str())
             .get_needed(&final_vertices);
-        if id == Mesh::ATTRIBUTE_POSITION.id {
+        if attr.id == Mesh::ATTRIBUTE_POSITION.id {
             att = att.offset_all(position_offset);
         }
         vals.extend(&att);
