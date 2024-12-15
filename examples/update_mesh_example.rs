@@ -1,7 +1,7 @@
 //! An example that showcases how to update the mesh.
 #[allow(unused_imports, dead_code)]
 use bevy::pbr::wireframe::{Wireframe, WireframeConfig, WireframePlugin};
-use bevy::prelude::*;
+use bevy::{color::palettes::css::LIMEGREEN, prelude::*};
 use bevy_meshem::prelude::*;
 use rand::prelude::*;
 
@@ -122,16 +122,12 @@ fn setup(
     .unwrap();
     let culled_mesh_handle: Handle<Mesh> = meshes.add(culled_mesh.clone());
     commands.spawn((
-        PbrBundle {
-            mesh: culled_mesh_handle,
-            material: materials.add(StandardMaterial {
-                // base_color: Color::LIME_GREEN,
-                // alpha_mode: AlphaMode::Mask(0.5),
-                base_color_texture: Some(texture_mesh),
-                ..default()
-            }),
+        Mesh3d(culled_mesh_handle),
+        MeshMaterial3d(materials.add(StandardMaterial {
+            base_color: Color::Srgba(LIMEGREEN),
+            base_color_texture: Some(texture_mesh),
             ..default()
-        },
+        })),
         Meshy {
             meta: metadata,
             grid: g,
@@ -154,58 +150,50 @@ fn setup(
     );
 
     // Camera in 3D space.
-    commands.spawn(Camera3dBundle {
-        transform: camera_and_light_transform,
-        ..default()
-    });
+    commands.spawn((
+        Camera3d::default(),
+        camera_and_light_transform
+    ));
 
     // Light up the scene.
-    commands.spawn(PointLightBundle {
-        point_light: PointLight {
+    commands.spawn((
+        PointLight {
             intensity: 7000.0,
             range: 1000.0,
             ..default()
         },
-        transform: camera_and_light_transform,
-        ..default()
-    });
+        camera_and_light_transform
+    ));
     // for (att, _val) in culled_mesh.attributes() {
     //     // dbg!(att);
     //     if att == Mesh::ATTRIBUTE_POSITION.id {}
     // }
-    commands.spawn(
-        TextBundle::from_section(
+    commands.spawn((
+       Text(
             format!(
-                "X/Y/Z: Rotate\nR: Reset orientation\nMove Camera: W/A/S/D/Left-Shift/Space\nToggle Wireframe: T\n"),
-            TextStyle {
-                font_size: 26.0,
-                color: Color::LIME_GREEN,
-                ..default()
-            },
-        )
-        .with_style(Style {
+                "X/Y/Z: Rotate\nR: Reset orientation\nMove Camera: W/A/S/D/Left-Shift/Space\nToggle Wireframe: T\n"
+            )
+        ),
+        TextColor(Color::Srgba(LIMEGREEN)),
+        Node {
             position_type: PositionType::Absolute,
             top: Val::Px(12.0),
             left: Val::Px(12.0),
             ..default()
-        }),
-    );
+        }
+    ));
     commands.spawn((
         MeshInfo,
-        TextBundle::from_section(
-            format!("Press -C- To Break / Add a random voxel\n",),
-            TextStyle {
-                font_size: 26.0,
-                color: Color::LIME_GREEN,
-                ..default()
-            },
-        )
-        .with_style(Style {
+        Text(
+            format!("Press -C- To Break / Add a random voxel\n")
+        ),
+        TextColor(Color::Srgba(LIMEGREEN)),
+        Node {
             position_type: PositionType::Absolute,
             bottom: Val::Px(12.0),
             left: Val::Px(12.0),
             ..default()
-        }),
+        }
     ));
 }
 
@@ -219,7 +207,7 @@ struct BlockRegistry {
 impl VoxelRegistry for BlockRegistry {
     /// The type of our Voxel, the example uses u16 for Simplicity but you may have a struct
     /// Block { Name: ..., etc ...}, and you'll define that as the type, but encoding the block
-    /// data onto simple type like u16 or u64 is probably prefferable.
+    /// data onto simple type like u16 or u64 is probably preferable.
     type Voxel = u16;
     /// The get_mesh function, probably the most important function in the
     /// [`VoxelRegistry`], it is what allows us to  quickly access the Mesh of each Voxel.
@@ -236,7 +224,7 @@ impl VoxelRegistry for BlockRegistry {
         VoxelMesh::Null
     }
     /// Important function that tells our Algorithm if the Voxel is "full", for example, the Air
-    /// in minecraft is not "full", but it is still on the chunk data, to singal there is nothing.
+    /// in minecraft is not "full", but it is still on the chunk data, to signal there is nothing.
     fn is_covering(&self, voxel: &u16, _side: Face) -> bool {
         return *voxel != 0;
     }
@@ -249,7 +237,7 @@ impl VoxelRegistry for BlockRegistry {
         return [1.0, 1.0, 1.0];
     }
     /// The attributes we want to take from out voxels, note that using a lot of different
-    /// attributes will likely lead to performance problems and unpredictible behaviour.
+    /// attributes will likely lead to performance problems and unpredictable behaviour.
     /// We chose these 3 because they are very common, the algorithm does preserve UV data.
     fn all_attributes(&self) -> Vec<bevy::render::mesh::MeshVertexAttribute> {
         return vec![
@@ -270,17 +258,17 @@ fn input_handler(
 ) {
     if keyboard_input.pressed(KeyCode::KeyX) {
         for mut transform in &mut query {
-            transform.rotate_x(time.delta_seconds() / 1.2);
+            transform.rotate_x(time.delta_secs() / 1.2);
         }
     }
     if keyboard_input.pressed(KeyCode::KeyY) {
         for mut transform in &mut query {
-            transform.rotate_y(time.delta_seconds() / 1.2);
+            transform.rotate_y(time.delta_secs() / 1.2);
         }
     }
     if keyboard_input.pressed(KeyCode::KeyZ) {
         for mut transform in &mut query {
-            transform.rotate_z(time.delta_seconds() / 1.2);
+            transform.rotate_z(time.delta_secs() / 1.2);
         }
     }
     if keyboard_input.pressed(KeyCode::KeyR) {
@@ -308,12 +296,12 @@ fn toggle_wireframe(
         if let Ok(ent) = with.get_single() {
             commands.entity(ent).remove::<Wireframe>();
             for (_, material) in materials.iter_mut() {
-                material.base_color.set_a(1.0);
+                material.base_color.set_alpha(1.0);
             }
         } else if let Ok(ent) = without.get_single() {
             commands.entity(ent).insert(Wireframe);
             for (_, material) in materials.iter_mut() {
-                material.base_color.set_a(0.0);
+                material.base_color.set_alpha(0.0);
             }
         }
     }
@@ -326,22 +314,22 @@ fn input_handler_rotation(
 ) {
     let t = query.get_single_mut().unwrap().into_inner();
     if keyboard_input.pressed(KeyCode::Space) {
-        t.translation += Vec3::Y * SPEED * time.delta_seconds();
+        t.translation += Vec3::Y * SPEED * time.delta_secs();
     }
     if keyboard_input.pressed(KeyCode::ShiftLeft) {
-        t.translation += Vec3::NEG_Y * SPEED * time.delta_seconds();
+        t.translation += Vec3::NEG_Y * SPEED * time.delta_secs();
     }
     if keyboard_input.pressed(KeyCode::KeyS) {
-        t.translation += t.back() * SPEED * time.delta_seconds();
+        t.translation += t.back() * SPEED * time.delta_secs();
     }
     if keyboard_input.pressed(KeyCode::KeyW) {
-        t.translation += t.forward() * SPEED * time.delta_seconds();
+        t.translation += t.forward() * SPEED * time.delta_secs();
     }
     if keyboard_input.pressed(KeyCode::KeyA) {
-        t.translation += t.left() * SPEED * time.delta_seconds();
+        t.translation += t.left() * SPEED * time.delta_secs();
     }
     if keyboard_input.pressed(KeyCode::KeyD) {
-        t.translation += t.right() * SPEED * time.delta_seconds();
+        t.translation += t.right() * SPEED * time.delta_secs();
     }
     t.look_at(
         Vec3::new(
@@ -361,7 +349,7 @@ fn mesh_update(
     mut meshy: Query<&mut Meshy>,
     breg: Res<BlockRegistry>,
     mut meshes: ResMut<Assets<Mesh>>,
-    mesh_query: Query<&Handle<Mesh>>,
+    mesh_query: Query<&Mesh3d>,
     mut event_reader: EventReader<RegenerateMesh>,
 ) {
     for _ in event_reader.read() {
@@ -371,18 +359,18 @@ fn mesh_update(
 
         let m = meshy.get_single_mut().unwrap().into_inner();
         let mut rng = rand::thread_rng();
-        let choise = m.grid.iter().enumerate().choose(&mut rng).unwrap();
+        let choice = m.grid.iter().enumerate().choose(&mut rng).unwrap();
         let neighbors: [Option<u16>; 6] = {
             let mut r = [None; 6];
             for i in 0..6 {
-                match get_neighbor(choise.0, Face::from(i), m.meta.dims) {
+                match get_neighbor(choice.0, Face::from(i), m.meta.dims) {
                     None => {}
                     Some(j) => r[i] = Some(m.grid[j]),
                 }
             }
             r
         };
-        match choise {
+        match choice {
             (i, 1) => {
                 m.meta.log(VoxelChange::Broken, i, 1, neighbors);
                 update_mesh(mesh, &mut m.meta, breg.into_inner());

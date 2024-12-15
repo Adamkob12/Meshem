@@ -1,7 +1,7 @@
 //! An example that showcases how to use the meshem function.
 #[allow(unused_imports)]
 use bevy::pbr::wireframe::{Wireframe, WireframeConfig, WireframePlugin};
-use bevy::{color::palettes::css::{LIMEGREEN, SALMON}, prelude::*, text::cosmic_text::ttf_parser::Style};
+use bevy::{color::palettes::css::{LIMEGREEN, SALMON}, prelude::*};
 use bevy_meshem::prelude::*;
 
 /// Constants for us to use.
@@ -83,6 +83,7 @@ fn setup(
     .unwrap();
     let culled_mesh_handle: Handle<Mesh> = meshes.add(culled_mesh.clone());
     commands.spawn((
+        Mesh3d(culled_mesh_handle),
         MeshMaterial3d::from(materials.add(StandardMaterial {
                 base_color: Color::Srgba(SALMON),
                 alpha_mode: AlphaMode::Mask(0.5),
@@ -129,7 +130,7 @@ fn setup(
     //     if att == Mesh::ATTRIBUTE_POSITION.id {}
     // }
     commands.spawn((
-        Text2d::new(format!(
+        Text::new(format!(
             "X/Y/Z: Rotate\nR: Reset orientation\nMove Camera: W/A/S/D/Left-Shift/Space\nToggle Wireframe: T\n")),
         TextColor::from(LIMEGREEN),
         Node {
@@ -141,7 +142,7 @@ fn setup(
     ));
     commands.spawn((
         MeshInfo,
-        Text2d::new(format!("Press -C- To regenerate the mesh with a different Algorithm\nVertices Count: {}\nMeshing Algorithm: {:?}",culled_mesh.count_vertices(),
+        Text::new(format!("Press -C- To regenerate the mesh with a different Algorithm\nVertices Count: {}\nMeshing Algorithm: {:?}",culled_mesh.count_vertices(),
         MESHING_ALGORITHM,)),
         TextColor::from(LIMEGREEN),
         Node {
@@ -162,7 +163,7 @@ struct BlockRegistry {
 impl VoxelRegistry for BlockRegistry {
     /// The type of our Voxel, the example uses u16 for Simplicity but you may have a struct
     /// Block { Name: ..., etc ...}, and you'll define that as the type, but encoding the block
-    /// data onto simple type like u16 or u64 is probably prefferable.
+    /// data onto simple type like u16 or u64 is probably preferable.
     type Voxel = u16;
     /// The get_mesh function, probably the most important function in the
     /// [`VoxelRegistry`], it is what allows us to  quickly access the Mesh of each Voxel.
@@ -173,7 +174,7 @@ impl VoxelRegistry for BlockRegistry {
         VoxelMesh::NormalCube(&self.block)
     }
     /// Important function that tells our Algorithm if the Voxel is "full", for example, the Air
-    /// in minecraft is not "full", but it is still on the chunk data, to singal there is nothing.
+    /// in minecraft is not "full", but it is still on the chunk data, to signal there is nothing.
     fn is_covering(&self, voxel: &Self::Voxel, _side: prelude::Face) -> bool {
         return *voxel != 0;
     }
@@ -186,7 +187,7 @@ impl VoxelRegistry for BlockRegistry {
         return [1.0, 1.0, 1.0];
     }
     /// The attributes we want to take from out voxels, note that using a lot of different
-    /// attributes will likely lead to performance problems and unpredictible behaviour.
+    /// attributes will likely lead to performance problems and unpredictable behaviour.
     /// We chose these 3 because they are very common, the algorithm does preserve UV data.
     fn all_attributes(&self) -> Vec<bevy::render::mesh::MeshVertexAttribute> {
         return vec![
@@ -300,7 +301,7 @@ fn regenerate_mesh(
     mut meshes: ResMut<Assets<Mesh>>,
     mesh_query: Query<&Mesh3d>,
     mut event_reader: EventReader<RegenerateMesh>,
-    mut text_query: Query<&mut Text2d, With<MeshInfo>>,
+    mut text_query: Query<&mut Text, With<MeshInfo>>,
 ) {
     for _ in event_reader.read() {
         let mesh = meshes

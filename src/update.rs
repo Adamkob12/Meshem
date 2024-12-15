@@ -1,6 +1,6 @@
 // use crate::pbs::*;
 use crate::prelude::*;
-use bevy::render::mesh::{Indices, MeshVertexAttributeId, VertexAttributeValues};
+use bevy::render::mesh::{Indices, VertexAttributeValues};
 
 /// The function updates the mesh according to the change log in the mesh meta data.
 pub fn update_mesh<T: std::fmt::Debug>(
@@ -348,7 +348,7 @@ fn add_voxel_after_gen(
     }
 
     // The code from now on is a little messy, but it is very simple in actuality. It is mostly
-    // just offseting the vertices and indices and formatting them into the right data-structres.
+    // just offsetting the vertices and indices and formatting them into the right data-structures.
 
     // offset the vertices, since we won't be using all the vertices of the the mesh,
     // we need to find out which of them we will be using first, and then filter out

@@ -19,12 +19,12 @@ pub enum MeshingAlgorithm {
 ///     should we cull. ex: in Minecraft you wouldn't cull the top because the player can see the
 ///     top of the chunk. But culling the bottom is ok because the player "shouldn't be there" so
 ///     he won't see it.
-/// - [`grid`](&[T]): one dimentional slice of voxels, to turn into a single mesh, the function
-///     assumes the real grid is 3 dimentional, and that the width, height and length match the
+/// - [`grid`](&[T]): one dimensional slice of voxels, to turn into a single mesh, the function
+///     assumes the real grid is 3 dimensional, and that the width, height and length match the
 ///     dimensions given with the dims argument.
 /// - [`reg`](VoxelRegistry): this is a data structure that will return the desired mesh attribute
 ///     we need, but(!) the size of each of the voxels MUST be the same across the entire grid.
-///     if this condition is not met, the grid will not be properly meshified.
+///     if this condition is not met, the grid will not be properly meshed.
 ///     An example to create a [`VoxelRegistry`] is in the examples folder.
 /// - ['ma'](MeshingAlgorithm): The meshing algorithm to use - currently supports Culling and
 ///     Naive. (Culling is always better than Naive)
@@ -271,11 +271,11 @@ fn add_vertices_normal_cube(
     }
 
     // The code from now on is a little messy, but it is very simple in actuality. It is mostly
-    // just offseting the vertices and indices and formatting them into the right data-structres.
+    // just offsetting the vertices and indices and formatting them into the right data-structures.
 
     // offset the vertices, since we won't be using all the vertices of the the mesh,
     // we need to find out which of them we will be using first, and then filter out
-    // the ones we dont need.
+    // the ones we don't need.
     let mut offset: u32 = 0;
     for q in sorted_vertices.iter() {
         match q {
