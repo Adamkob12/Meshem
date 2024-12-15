@@ -12,7 +12,7 @@ pub enum Face {
 pub(crate) const OFFSET_CONST: u32 = 0b0001_1111_1111_1111_1111_1111_1111_1111;
 pub(crate) const REVERSE_OFFSET_CONST: u32 = 0b1110_0000_0000_0000_0000_0000_0000_0000;
 
-/// Funtion converts a `Face` into an its encoded representation for opcode.
+/// Function converts a `Face` into an its encoded representation for opcode.
 pub fn face_to_u32(f: Face) -> u32 {
     match f {
         // 101 -> 2^31 + 2^29
@@ -84,7 +84,7 @@ impl From<usize> for Face {
             3 => Face::Left,
             4 => Face::Back,
             5 => Face::Forward,
-            _ => panic!("Face can only be infered from 6 values, 0..5 (inclucive)"),
+            _ => panic!("Face can only be inferred from 6 values, 0..5 (inclusive)"),
         }
     }
 }

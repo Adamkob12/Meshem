@@ -1,7 +1,7 @@
 //! An example that showcases how to use the meshem function.
 #[allow(unused_imports)]
 use bevy::pbr::wireframe::{Wireframe, WireframeConfig, WireframePlugin};
-use bevy::prelude::*;
+use bevy::{color::palettes::css::{LIMEGREEN, SALMON}, prelude::*};
 use bevy_meshem::prelude::*;
 
 /// Constants for us to use.
@@ -83,15 +83,12 @@ fn setup(
     .unwrap();
     let culled_mesh_handle: Handle<Mesh> = meshes.add(culled_mesh.clone());
     commands.spawn((
-        PbrBundle {
-            mesh: culled_mesh_handle,
-            material: materials.add(StandardMaterial {
-                base_color: Color::SALMON,
+        Mesh3d(culled_mesh_handle),
+        MeshMaterial3d::from(materials.add(StandardMaterial {
+                base_color: Color::Srgba(SALMON),
                 alpha_mode: AlphaMode::Mask(0.5),
                 ..default()
-            }),
-            ..default()
-        },
+            })),
         Meshy {
             ma: MESHING_ALGORITHM,
             meta: metadata,
@@ -114,59 +111,46 @@ fn setup(
     );
 
     // Camera in 3D space.
-    commands.spawn(Camera3dBundle {
-        transform: camera_and_light_transform,
-        ..default()
-    });
+    commands.spawn((
+        Camera3d::default(),
+        camera_and_light_transform
+    ));
 
     // Light up the scene.
-    commands.spawn(PointLightBundle {
-        point_light: PointLight {
+    commands.spawn((
+        PointLight {
             intensity: 5000.0,
             range: 500.0,
             ..default()
         },
-        transform: camera_and_light_transform,
-        ..default()
-    });
+        camera_and_light_transform
+    ));
     // for (att, _val) in culled_mesh.attributes() {
     //     // dbg!(att);
     //     if att == Mesh::ATTRIBUTE_POSITION.id {}
     // }
-    commands.spawn(
-        TextBundle::from_section(
-            format!(
-                "X/Y/Z: Rotate\nR: Reset orientation\nMove Camera: W/A/S/D/Left-Shift/Space\nToggle Wireframe: T\n"),
-            TextStyle {
-                font_size: 26.0,
-                color: Color::LIME_GREEN,
-                ..default()
-            },
-        )
-        .with_style(Style {
+    commands.spawn((
+        Text::new(format!(
+            "X/Y/Z: Rotate\nR: Reset orientation\nMove Camera: W/A/S/D/Left-Shift/Space\nToggle Wireframe: T\n")),
+        TextColor::from(LIMEGREEN),
+        Node {
             position_type: PositionType::Absolute,
             top: Val::Px(12.0),
             left: Val::Px(12.0),
             ..default()
-        }),
-    );
+        },
+    ));
     commands.spawn((
         MeshInfo,
-        TextBundle::from_section(
-            format!("Press -C- To regenerate the mesh with a different Algorithm\nVertices Count: {}\nMeshing Algorithm: {:?}",culled_mesh.count_vertices(),
-                MESHING_ALGORITHM,),
-            TextStyle {
-                font_size: 26.0,
-                color: Color::LIME_GREEN,
-                ..default()
-            },
-        )
-        .with_style(Style {
+        Text::new(format!("Press -C- To regenerate the mesh with a different Algorithm\nVertices Count: {}\nMeshing Algorithm: {:?}",culled_mesh.count_vertices(),
+        MESHING_ALGORITHM,)),
+        TextColor::from(LIMEGREEN),
+        Node {
             position_type: PositionType::Absolute,
             bottom: Val::Px(12.0),
             left: Val::Px(12.0),
             ..default()
-        }),
+        },
     ));
 }
 
@@ -179,7 +163,7 @@ struct BlockRegistry {
 impl VoxelRegistry for BlockRegistry {
     /// The type of our Voxel, the example uses u16 for Simplicity but you may have a struct
     /// Block { Name: ..., etc ...}, and you'll define that as the type, but encoding the block
-    /// data onto simple type like u16 or u64 is probably prefferable.
+    /// data onto simple type like u16 or u64 is probably preferable.
     type Voxel = u16;
     /// The get_mesh function, probably the most important function in the
     /// [`VoxelRegistry`], it is what allows us to  quickly access the Mesh of each Voxel.
@@ -190,7 +174,7 @@ impl VoxelRegistry for BlockRegistry {
         VoxelMesh::NormalCube(&self.block)
     }
     /// Important function that tells our Algorithm if the Voxel is "full", for example, the Air
-    /// in minecraft is not "full", but it is still on the chunk data, to singal there is nothing.
+    /// in minecraft is not "full", but it is still on the chunk data, to signal there is nothing.
     fn is_covering(&self, voxel: &Self::Voxel, _side: prelude::Face) -> bool {
         return *voxel != 0;
     }
@@ -203,7 +187,7 @@ impl VoxelRegistry for BlockRegistry {
         return [1.0, 1.0, 1.0];
     }
     /// The attributes we want to take from out voxels, note that using a lot of different
-    /// attributes will likely lead to performance problems and unpredictible behaviour.
+    /// attributes will likely lead to performance problems and unpredictable behaviour.
     /// We chose these 3 because they are very common, the algorithm does preserve UV data.
     fn all_attributes(&self) -> Vec<bevy::render::mesh::MeshVertexAttribute> {
         return vec![
@@ -224,17 +208,17 @@ fn input_handler(
 ) {
     if keyboard_input.pressed(KeyCode::KeyX) {
         for mut transform in &mut query {
-            transform.rotate_x(time.delta_seconds() / 1.2);
+            transform.rotate_x(time.delta_secs() / 1.2);
         }
     }
     if keyboard_input.pressed(KeyCode::KeyY) {
         for mut transform in &mut query {
-            transform.rotate_y(time.delta_seconds() / 1.2);
+            transform.rotate_y(time.delta_secs() / 1.2);
         }
     }
     if keyboard_input.pressed(KeyCode::KeyZ) {
         for mut transform in &mut query {
-            transform.rotate_z(time.delta_seconds() / 1.2);
+            transform.rotate_z(time.delta_secs() / 1.2);
         }
     }
     if keyboard_input.pressed(KeyCode::KeyR) {
@@ -262,12 +246,12 @@ fn toggle_wireframe(
         if let Ok(ent) = with.get_single() {
             commands.entity(ent).remove::<Wireframe>();
             for (_, material) in materials.iter_mut() {
-                material.base_color.set_a(1.0);
+                material.base_color.set_alpha(1.0);
             }
         } else if let Ok(ent) = without.get_single() {
             commands.entity(ent).insert(Wireframe);
             for (_, material) in materials.iter_mut() {
-                material.base_color.set_a(0.0);
+                material.base_color.set_alpha(0.0);
             }
         }
     }
@@ -275,27 +259,27 @@ fn toggle_wireframe(
 
 fn input_handler_rotation(
     keyboard_input: Res<ButtonInput<KeyCode>>,
-    mut query: Query<&mut Transform, With<Camera>>,
+    mut query: Query<&mut Transform, With<Camera3d>>,
     time: Res<Time>,
 ) {
     let t = query.get_single_mut().unwrap().into_inner();
     if keyboard_input.pressed(KeyCode::Space) {
-        t.translation += Vec3::Y * SPEED * time.delta_seconds();
+        t.translation += Vec3::Y * SPEED * time.delta_secs();
     }
     if keyboard_input.pressed(KeyCode::ShiftLeft) {
-        t.translation += Vec3::NEG_Y * SPEED * time.delta_seconds();
+        t.translation += Vec3::NEG_Y * SPEED * time.delta_secs();
     }
     if keyboard_input.pressed(KeyCode::KeyS) {
-        t.translation += t.back() * SPEED * time.delta_seconds();
+        t.translation += t.back() * SPEED * time.delta_secs();
     }
     if keyboard_input.pressed(KeyCode::KeyW) {
-        t.translation += t.forward() * SPEED * time.delta_seconds();
+        t.translation += t.forward() * SPEED * time.delta_secs();
     }
     if keyboard_input.pressed(KeyCode::KeyA) {
-        t.translation += t.left() * SPEED * time.delta_seconds();
+        t.translation += t.left() * SPEED * time.delta_secs();
     }
     if keyboard_input.pressed(KeyCode::KeyD) {
-        t.translation += t.right() * SPEED * time.delta_seconds();
+        t.translation += t.right() * SPEED * time.delta_secs();
     }
     t.look_at(
         Vec3::new(
@@ -315,7 +299,7 @@ fn regenerate_mesh(
     mut meshy: Query<&mut Meshy>,
     breg: Res<BlockRegistry>,
     mut meshes: ResMut<Assets<Mesh>>,
-    mesh_query: Query<&Handle<Mesh>>,
+    mesh_query: Query<&Mesh3d>,
     mut event_reader: EventReader<RegenerateMesh>,
     mut text_query: Query<&mut Text, With<MeshInfo>>,
 ) {
@@ -343,7 +327,7 @@ fn regenerate_mesh(
         )
         .unwrap();
 
-        t.sections[0].value = format!("Press -C- To regenerate the mesh with a different Algorithm\nVertices Count: {}\nMeshing Algorithm: {:?}",mesh.count_vertices(),m.ma);
+        t.0 = format!("Press -C- To regenerate the mesh with a different Algorithm\nVertices Count: {}\nMeshing Algorithm: {:?}",mesh.count_vertices(),m.ma);
         return;
     }
 }

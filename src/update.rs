@@ -348,7 +348,7 @@ fn add_voxel_after_gen(
     }
 
     // The code from now on is a little messy, but it is very simple in actuality. It is mostly
-    // just offseting the vertices and indices and formatting them into the right data-structres.
+    // just offsetting the vertices and indices and formatting them into the right data-structures.
 
     // offset the vertices, since we won't be using all the vertices of the the mesh,
     // we need to find out which of them we will be using first, and then filter out
@@ -380,12 +380,12 @@ fn add_voxel_after_gen(
     }
     indices_main.extend(indices_to_save);
 
-    for (id, vals) in main_mesh.attributes_mut() {
+    for (attr, vals) in main_mesh.attributes_mut() {
         let mut att = voxel
-            .attribute(id)
-            .expect(format!("Couldn't retrieve voxel mesh attribute {:?}.", id).as_str())
+            .attribute(attr.id)
+            .expect(format!("Couldn't retrieve voxel mesh attribute {:?}.", attr.id).as_str())
             .get_needed(&final_vertices);
-        if id == Mesh::ATTRIBUTE_POSITION.id {
+        if attr.id == Mesh::ATTRIBUTE_POSITION.id {
             att = att.offset_all(position_offset);
         }
         vals.extend(&att);

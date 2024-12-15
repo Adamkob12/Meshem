@@ -28,7 +28,7 @@ pub mod prelude {
 }
 
 /// Implementing this trait for your own data-structure is the most important
-/// prerequesite if you want to use the function.
+/// prerequisite if you want to use the function.
 pub trait VoxelRegistry {
     type Voxel: std::fmt::Debug + Eq + PartialEq + Sized + Clone + Copy;
     /// Returns None if the mesh is "irrelevant" as in it's air or not a Voxel.
@@ -38,7 +38,7 @@ pub trait VoxelRegistry {
     fn is_covering(&self, voxel: &Self::Voxel, side: prelude::Face) -> bool;
     /// The center of the voxel (physical center, the center of the default block is 0,0,0 eg)
     fn get_center(&self) -> [f32; 3];
-    /// All the voxels must have standard and equal dimesions (y is up).
+    /// All the voxels must have standard and equal dimensions (y is up).
     fn get_voxel_dimensions(&self) -> [f32; 3];
     /// The attributes we are considering while meshing the grid.
     fn all_attributes(&self) -> Vec<MeshVertexAttribute>;
