@@ -8,6 +8,7 @@ Bevy Compatibility:
 
 | Bevy Version |  bevy_meshem         |
 |--------------|----------------------|
+| `0.15`       | `0.5.x`              |
 | `0.12`       | `0.3.x`              |
 | `0.11.x`     | `0.2.x`              |
 | `0.11`       | `0.1.1`              |
@@ -63,7 +64,7 @@ Greedy Meshing is even more efficient than Culling, but it makes very limiting c
 
   ```toml
   [dependencies]
-  bevy_meshem = "0.3"
+  bevy_meshem = "0.5"
   ```
 
 ## Usage
