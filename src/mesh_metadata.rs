@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use bevy::utils::hashbrown::HashMap;
+use bevy::platform::collections::HashMap;
 
 // Data structure "Voxel index to Vertex index", it is used in the meta-data to save which
 // vertex belongs to which voxel. The `vivi` field is the same length as the length of the grid,
