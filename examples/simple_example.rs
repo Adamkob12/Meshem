@@ -11,7 +11,7 @@ const MESHING_ALGORITHM: MeshingAlgorithm = MeshingAlgorithm::Culling;
 
 fn main() {
     let mut app = App::new();
-    app.add_plugins(DefaultPlugins).add_plugins(WireframePlugin);
+    app.add_plugins(DefaultPlugins).add_plugins(WireframePlugin::default());
 
     app.insert_resource(BlockRegistry {
         block: generate_voxel_mesh(
@@ -27,6 +27,7 @@ fn main() {
     .insert_resource(AmbientLight {
         brightness: 1500.0,
         color: Color::WHITE,
+        ..default()
     });
 
     app.add_systems(Startup, setup).add_systems(
@@ -227,10 +228,10 @@ fn input_handler(
         }
     }
     if keyboard_input.just_pressed(KeyCode::KeyT) {
-        event_writer.send_default();
+        event_writer.write_default();
     }
     if keyboard_input.just_pressed(KeyCode::KeyC) {
-        e.send_default();
+        e.write_default();
     }
 }
 
@@ -243,12 +244,12 @@ fn toggle_wireframe(
     mut events: EventReader<ToggleWireframe>,
 ) {
     for _ in events.read() {
-        if let Ok(ent) = with.get_single() {
+        if let Ok(ent) = with.single() {
             commands.entity(ent).remove::<Wireframe>();
             for (_, material) in materials.iter_mut() {
                 material.base_color.set_alpha(1.0);
             }
-        } else if let Ok(ent) = without.get_single() {
+        } else if let Ok(ent) = without.single() {
             commands.entity(ent).insert(Wireframe);
             for (_, material) in materials.iter_mut() {
                 material.base_color.set_alpha(0.0);
@@ -262,7 +263,7 @@ fn input_handler_rotation(
     mut query: Query<&mut Transform, With<Camera3d>>,
     time: Res<Time>,
 ) {
-    let t = query.get_single_mut().unwrap().into_inner();
+    let t = query.single_mut().unwrap().into_inner();
     if keyboard_input.pressed(KeyCode::Space) {
         t.translation += Vec3::Y * SPEED * time.delta_secs();
     }
@@ -305,13 +306,13 @@ fn regenerate_mesh(
 ) {
     for _ in event_reader.read() {
         let mesh = meshes
-            .get_mut(mesh_query.get_single().unwrap())
+            .get_mut(mesh_query.single().unwrap())
             .expect("Couldn't get a mut ref to the mesh");
         let grid = [1; FACTOR * FACTOR * FACTOR];
         let dims: Dimensions = (FACTOR / 2, FACTOR * 2, FACTOR);
 
-        let m = meshy.get_single_mut().unwrap().into_inner();
-        let t = text_query.get_single_mut().unwrap().into_inner();
+        let m = meshy.single_mut().unwrap().into_inner();
+        let t = text_query.single_mut().unwrap().into_inner();
         match m.ma {
             MeshingAlgorithm::Culling => m.ma = MeshingAlgorithm::Naive,
             MeshingAlgorithm::Naive => m.ma = MeshingAlgorithm::Culling,
