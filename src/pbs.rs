@@ -2,8 +2,7 @@
 /// voxel based games that resembles Ambient Occlusion, but it is static- which means the
 /// shadows are computed only once, when the mesh is generated (or updated).
 use crate::prelude::*;
-use bevy::math::Vec3;
-use bevy::render::mesh::{Mesh, VertexAttributeValues};
+use bevy::{math::Vec3, mesh::VertexAttributeValues};
 use std::sync::{Arc, RwLock};
 
 #[derive(Copy, Clone)]

@@ -1,6 +1,6 @@
 // use crate::pbs::*;
 use crate::prelude::*;
-use bevy::render::mesh::{Indices, VertexAttributeValues};
+use bevy::mesh::{Indices, VertexAttributeValues};
 
 /// The function updates the mesh according to the change log in the mesh meta data.
 pub fn update_mesh<T: std::fmt::Debug>(

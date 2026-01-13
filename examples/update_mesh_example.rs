@@ -49,11 +49,6 @@ fn main() {
     app.insert_resource(BlockRegistry {
         grass: mesh,
         dirt: mesh2,
-    })
-    .insert_resource(AmbientLight {
-        brightness: 400.0,
-        color: Color::WHITE,
-        ..default()
     });
 
     app.add_systems(Startup, setup).add_systems(
@@ -66,8 +61,8 @@ fn main() {
         ),
     );
 
-    app.add_event::<ToggleWireframe>()
-        .add_event::<RegenerateMesh>();
+    app.add_message::<ToggleWireframe>()
+        .add_message::<RegenerateMesh>();
 
     app.run();
 }
@@ -81,10 +76,10 @@ struct Meshy {
 #[derive(Component)]
 struct MeshInfo;
 
-#[derive(Event, Default)]
+#[derive(Message, Default)]
 struct ToggleWireframe;
 
-#[derive(Event, Default)]
+#[derive(Message, Default)]
 struct RegenerateMesh;
 
 /// Setting up everything to showcase the mesh.
@@ -149,6 +144,13 @@ fn setup(
         ),
         Vec3::Y,
     );
+
+    // Ambient Light
+    commands.spawn(AmbientLight {
+        brightness: 400.0,
+        color: Color::WHITE,
+        ..default()
+    });
 
     // Camera in 3D space.
     commands.spawn((
@@ -240,7 +242,7 @@ impl VoxelRegistry for BlockRegistry {
     /// The attributes we want to take from out voxels, note that using a lot of different
     /// attributes will likely lead to performance problems and unpredictable behaviour.
     /// We chose these 3 because they are very common, the algorithm does preserve UV data.
-    fn all_attributes(&self) -> Vec<bevy::render::mesh::MeshVertexAttribute> {
+    fn all_attributes(&self) -> Vec<bevy::mesh::MeshVertexAttribute> {
         return vec![
             Mesh::ATTRIBUTE_POSITION,
             Mesh::ATTRIBUTE_UV_0,
@@ -254,8 +256,8 @@ fn input_handler(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut query: Query<&mut Transform, With<Meshy>>,
     time: Res<Time>,
-    mut event_writer: EventWriter<ToggleWireframe>,
-    mut e: EventWriter<RegenerateMesh>,
+    mut message_writer: MessageWriter<ToggleWireframe>,
+    mut e: MessageWriter<RegenerateMesh>,
 ) {
     if keyboard_input.pressed(KeyCode::KeyX) {
         for mut transform in &mut query {
@@ -278,7 +280,7 @@ fn input_handler(
         }
     }
     if keyboard_input.just_pressed(KeyCode::KeyT) {
-        event_writer.write_default();
+        message_writer.write_default();
     }
     if keyboard_input.pressed(KeyCode::KeyC) {
         e.write_default();
@@ -291,9 +293,9 @@ fn toggle_wireframe(
     mut materials: ResMut<Assets<StandardMaterial>>,
     with: Query<Entity, With<Wireframe>>,
     without: Query<Entity, (Without<Wireframe>, With<Meshy>)>,
-    mut events: EventReader<ToggleWireframe>,
+    mut messages: MessageReader<ToggleWireframe>,
 ) {
-    for _ in events.read() {
+    for _ in messages.read() {
         if let Ok(ent) = with.single() {
             commands.entity(ent).remove::<Wireframe>();
             for (_, material) in materials.iter_mut() {
@@ -351,9 +353,9 @@ fn mesh_update(
     breg: Res<BlockRegistry>,
     mut meshes: ResMut<Assets<Mesh>>,
     mesh_query: Query<&Mesh3d>,
-    mut event_reader: EventReader<RegenerateMesh>,
+    mut message_reader: MessageReader<RegenerateMesh>,
 ) {
-    for _ in event_reader.read() {
+    for _ in message_reader.read() {
         let mesh = meshes
             .get_mut(mesh_query.single().unwrap())
             .expect("Couldn't get a mut ref to the mesh");
