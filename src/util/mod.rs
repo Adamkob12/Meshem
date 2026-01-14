@@ -154,7 +154,7 @@ pub const fn one_d_cords_safe(threed: [usize; 3], dims: (usize, usize, usize)) -
 }
 
 // Extract the vertex data for the physics engine.
-use bevy::render::mesh::{Mesh, VertexAttributeValues};
+use bevy::mesh::{Mesh, VertexAttributeValues};
 pub fn extract_position_vertex_data(mesh: &Mesh) -> Vec<Vec3> {
     let VertexAttributeValues::Float32x3(pos_vertices) =
         mesh.attribute(Mesh::ATTRIBUTE_POSITION).unwrap()
@@ -168,7 +168,7 @@ pub fn extract_position_vertex_data(mesh: &Mesh) -> Vec<Vec3> {
 }
 
 // Extract the indices for the physics engine.
-use bevy::render::mesh::Indices;
+use bevy::mesh::Indices;
 pub fn extract_indices_data(mesh: &Mesh) -> Vec<[u32; 3]> {
     let Indices::U32(indices) = mesh.indices().unwrap() else {
         panic!("Indices data shoud be in `Indices::U32` format")

@@ -1,9 +1,9 @@
 //! This module contains the main functions themself, and some added utilities and defs.
 use crate::pbs::*;
 use crate::prelude::*;
+use bevy::asset::RenderAssetUsages;
 use bevy::prelude::*;
-use bevy::render::mesh::{Indices, MeshVertexAttribute, VertexAttributeValues};
-use bevy::render::render_asset::RenderAssetUsages;
+use bevy::mesh::{Indices, MeshVertexAttribute, VertexAttributeValues};
 use bevy::render::render_resource::PrimitiveTopology;
 
 /// All the variants for the Meshing algorithm.

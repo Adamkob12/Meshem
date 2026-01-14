@@ -1,9 +1,9 @@
 //! A module containing the "default block", it is used in the examples,
 //! it is simple and easy to work with.
 use crate::prelude::*;
+use bevy::asset::RenderAssetUsages;
+use bevy::mesh::Indices;
 use bevy::prelude::*;
-use bevy::render::mesh::Indices;
-use bevy::render::render_asset::RenderAssetUsages;
 use bevy::render::render_resource::PrimitiveTopology;
 
 /// Function that generates the mesh of a voxel.
