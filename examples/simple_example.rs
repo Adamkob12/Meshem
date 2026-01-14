@@ -107,19 +107,15 @@ fn setup(
         Vec3::Y,
     );
 
-    // Ambient Light
-    commands.spawn(
+    // Camera in 3D space.
+    commands.spawn((
+        Camera3d::default(),
+        camera_and_light_transform,
         AmbientLight {
                 brightness: 1500.0,
                 color: Color::WHITE,
                 ..default()
         }
-    );
-
-    // Camera in 3D space.
-    commands.spawn((
-        Camera3d::default(),
-        camera_and_light_transform
     ));
 
     // Light up the scene.
