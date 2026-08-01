@@ -88,6 +88,8 @@ Flexibility, Stability, User experience and Performance.
 Contributions are very welcome! This project is currently in its early stages and operates closely with the Bevy rendering API.
 As a result, it may have some stability challenges. However, your contributions can play a significant role in enhancing and stabilizing the project.
 
+**License Disclaimer:** By contributing to this project, you agree that all your contributions will be licensed under the Apache 2.0 License. Please ensure that any contributed code or assets are compatible with this license to avoid licensing conflicts.
+
 ## Credits
 
 Thanks to mikollysenko for writing this informative article!
